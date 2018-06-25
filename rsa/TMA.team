@@ -1,0 +1,6 @@
+#Robocode robot team
+#Wed Jun 20 17:27:44 ICT 2018
+team.members=rsa.MyRobot*,rsa.MyTeamate*,rsa.MyTeamate*,rsa.MyTeamate*,rsa.MyTeamate*
+team.author.name=nhat
+robocode.version=1.9.2.6
+team.description=tma \t
