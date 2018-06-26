@@ -1,4 +1,4 @@
-package com.ozone.robocode.team;
+package com.ozone.robocode.team.old;
 
 import com.ozone.robocode.utils.Point;
 import com.ozone.robocode.utils.RobotColors;

@@ -1,4 +1,4 @@
-package com.ozone.robocode.team;
+package com.ozone.robocode.team.old;
 
 import java.awt.Color;
 import java.io.IOException;

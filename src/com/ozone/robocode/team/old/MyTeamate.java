@@ -1,4 +1,4 @@
-package com.ozone.robocode.team;
+package com.ozone.robocode.team.old;
 
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
