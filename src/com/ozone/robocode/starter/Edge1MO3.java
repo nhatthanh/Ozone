@@ -1,5 +1,7 @@
 package com.ozone.robocode.starter;
 
-public class Edge1MO3 {
+import robocode.tma.TTeamMemberRobot;
+
+public class Edge1MO3 extends TTeamMemberRobot {
 
 }
