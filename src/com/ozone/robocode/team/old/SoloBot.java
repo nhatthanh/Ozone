@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ozone.robocode.utils.Point;
+import com.ozone.robocode.utils.RobotPosition;
 import com.ozone.robocode.utils.RobotColors;
 
 import robocode.RobotDeathEvent;
@@ -169,7 +169,7 @@ public class SoloBot extends TTeamLeaderRobot{
         if (this.target != null) {
             if(!isTeammate(target.name)){
                 try {
-                    this.broadcastMessage(new Point(this.target.targetX,this.target.targetY));
+                    this.broadcastMessage(new RobotPosition(this.target.targetX,this.target.targetY));
                     double dist = this.distanceTo(this.target.targetX, this.target.targetY);
                     double angle = Math.atan(18.0D / dist);
                     if (Math.abs(this.getGunTurnRemaining()) < angle) {

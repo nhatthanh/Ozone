@@ -3,7 +3,7 @@ package com.ozone.robocode.team.old;
 import java.awt.Color;
 import java.io.IOException;
 
-import com.ozone.robocode.utils.Point;
+import com.ozone.robocode.utils.RobotPosition;
 import com.ozone.robocode.utils.RobotColors;
 
 import robocode.HitByBulletEvent;
@@ -94,7 +94,7 @@ public class MyRobot2 extends TTeamLeaderRobot {
 
                 try {
                     // Send enemy position to teammates
-                    broadcastMessage(new Point(enemyX, enemyY));
+                    broadcastMessage(new RobotPosition(enemyX, enemyY));
                 } catch (IOException ex) {
                     out.println("Unable to send order: ");
                     ex.printStackTrace(out);

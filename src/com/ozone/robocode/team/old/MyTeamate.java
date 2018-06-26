@@ -2,7 +2,7 @@ package com.ozone.robocode.team.old;
 
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
-import com.ozone.robocode.utils.Point;
+import com.ozone.robocode.utils.RobotPosition;
 import com.ozone.robocode.utils.RobotColors;
 
 import robocode.HitRobotEvent;
@@ -29,8 +29,8 @@ public class MyTeamate extends TTeamMemberRobot {
     @Override
     public void onMessageReceived(MessageEvent e) {
         // Fire at a point
-        if (e.getMessage() instanceof Point) {
-            Point p = (Point) e.getMessage();
+        if (e.getMessage() instanceof RobotPosition) {
+            RobotPosition p = (RobotPosition) e.getMessage();
             // Calculate x and y to target
             double dx = p.getX() - this.getX();
             double dy = p.getY() - this.getY();

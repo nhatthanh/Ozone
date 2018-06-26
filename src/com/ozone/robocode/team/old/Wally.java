@@ -1,6 +1,6 @@
 package com.ozone.robocode.team.old;
 
-import com.ozone.robocode.utils.Point;
+import com.ozone.robocode.utils.RobotPosition;
 import com.ozone.robocode.utils.RobotColors;
 
 import robocode.HitByBulletEvent;
@@ -36,8 +36,8 @@ public class Wally extends TTeamMemberRobot{
 
     @Override
     public void onMessageReceived(MessageEvent e) {
-        if (e.getMessage() instanceof Point) {
-            Point p = (Point)e.getMessage();
+        if (e.getMessage() instanceof RobotPosition) {
+            RobotPosition p = (RobotPosition)e.getMessage();
             double dx = p.getX() - this.getX();
             double dy = p.getY() - this.getY();
             double theta = Math.toDegrees(Math.atan2(dx, dy));
