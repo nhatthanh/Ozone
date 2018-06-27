@@ -2,15 +2,20 @@ package com.ozone.robocode.starter;
 
 import com.ozone.robocode.utils.RobotColors;
 import com.ozone.robocode.utils.RobotPosition;
+import robocode.HitRobotEvent;
+import robocode.HitWallEvent;
 import robocode.MessageEvent;
 import robocode.tma.TTeamMemberRobot;
-
 
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class TrivelaMO3 extends TTeamMemberRobot{
     RobotPosition startPoint;
+    RobotPosition secondPoint;
+    RobotPosition thirdPoint;
+    RobotPosition fourthPoint;
     RobotPosition myPos;
+
     @Override
     public void run() {
         double borderRange = (float) getBattleFieldWidth()/2;
@@ -18,17 +23,22 @@ public class TrivelaMO3 extends TTeamMemberRobot{
 //        this.setMaxVelocity(5);
         if(getY() < borderRange){
             startPoint = new RobotPosition(300,300);
+            secondPoint = new RobotPosition(300,800);
+            thirdPoint = new RobotPosition(800,800);
+            fourthPoint = new RobotPosition(800,300);
+
         }else {
             startPoint = new RobotPosition(getBattleFieldWidth() - 300,  getBattleFieldHeight() - 300);
+            secondPoint = new RobotPosition(300,800);
+            thirdPoint = new RobotPosition(300,300);
+            fourthPoint = new RobotPosition(800,300);
         }
         this.goTo(startPoint);
-
         while (true){
-            goTo(new RobotPosition(300,800));
-            goTo(new RobotPosition(800,300));
-            goTo(startPoint);
+            goTo(secondPoint);
+            goTo(thirdPoint);
+            goTo(fourthPoint);
         }
-
     }
 
     private void goTo(RobotPosition destination){
@@ -43,6 +53,12 @@ public class TrivelaMO3 extends TTeamMemberRobot{
         this.ahead(distanceTo(destination.getX(),destination.getY()));
     }
 
+//    private boolean isArrive(RobotPosition destination){
+//        myPos = new RobotPosition(this.getX(),this.getY());
+//        long x = Math.round(myPos.getX());
+//        long y = Math.round(myPos.getY());
+//        return x == destination.getX() && y == destination.getY();
+//    }
 
     @Override
     public void onMessageReceived(MessageEvent e) {
@@ -56,7 +72,6 @@ public class TrivelaMO3 extends TTeamMemberRobot{
             double theta = Math.toDegrees(Math.atan2(dx, dy));
             // Turn gun to target
             turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
-
             // Fire hard!
             if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
                 fire(3);
@@ -72,6 +87,34 @@ public class TrivelaMO3 extends TTeamMemberRobot{
             setRadarColor(c.radarColor);
             setScanColor(c.scanColor);
             setBulletColor(c.bulletColor);
+        }
+    }
+
+    @Override
+    public void onHitRobot(HitRobotEvent e) {
+        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
+            if(isTeammate(e.getName())){
+                this.turnRight(90);
+            }else{
+                this.back(100);
+            }
+
+        } else {
+            if(isTeammate(e.getName())){
+                this.turnRight(90);
+            }else{
+                this.ahead(100.0D);
+            }
+        }
+    }
+
+    @Override
+    public void onHitWall(HitWallEvent e) {
+        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
+            this.turnRight(90);
+
+        } else {
+            this.back(100);
         }
     }
 
