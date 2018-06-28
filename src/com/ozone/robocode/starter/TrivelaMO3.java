@@ -68,40 +68,55 @@ public class TrivelaMO3 extends TTeamMemberRobot{
         if (e.getMessage() instanceof RobotPosition) {
             myPos = new RobotPosition(this.getX(),this.getY());
             RobotPosition enemy = (RobotPosition) e.getMessage();
-            if(enemy.getName().equals(deathRobot.getName())){
-                enemyPos = null;
+//            if(enemy.getName().equals(deathRobot.getName())){
+//                enemyPos = null;
+//                return;
+//            }
+//            if(enemyPos != null){
+//                if(enemyPos.getName().equals(enemy.getName())){
+//                    double dx = enemy.getX() - this.getX();
+//                    double dy = enemy.getY() - this.getY();
+//                    // Calculate angle to target
+//                    double theta = Math.toDegrees(Math.atan2(dx, dy));
+//                    // Turn gun to target
+//                    turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+//                    // Fire hard!
+//                    if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
+//                        fire(3);
+//                    }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
+//                        fire(1.0D);
+//                    }
+//                }
+//            }else {
+//                deathRobot.setName("");
+//                enemyPos = enemy;
+//                double dx = enemy.getX() - this.getX();
+//                double dy = enemy.getY() - this.getY();
+//                // Calculate angle to target
+//                double theta = Math.toDegrees(Math.atan2(dx, dy));
+//                // Turn gun to target
+//                turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+//                // Fire hard!
+//                if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
+//                    fire(3);
+//                }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
+//                    fire(1.0D);
+//                }
+//            }
+
+            double dx = enemy.getX() - this.getX();
+            double dy = enemy.getY() - this.getY();
+            // Calculate angle to target
+            double theta = Math.toDegrees(Math.atan2(dx, dy));
+            // Turn gun to target
+            turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+            // Fire hard!
+            if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
+                fire(3);
+            }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
+                fire(1.0D);
+            }else if(enemy.getDistance(myPos,enemy) > 500){
                 return;
-            }
-            if(enemyPos != null){
-                if(enemyPos.getName().equals(enemy.getName())){
-                    double dx = enemy.getX() - this.getX();
-                    double dy = enemy.getY() - this.getY();
-                    // Calculate angle to target
-                    double theta = Math.toDegrees(Math.atan2(dx, dy));
-                    // Turn gun to target
-                    turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
-                    // Fire hard!
-                    if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
-                        fire(3);
-                    }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
-                        fire(1.0D);
-                    }
-                }
-            }else {
-                deathRobot.setName("");
-                enemyPos = enemy;
-                double dx = enemy.getX() - this.getX();
-                double dy = enemy.getY() - this.getY();
-                // Calculate angle to target
-                double theta = Math.toDegrees(Math.atan2(dx, dy));
-                // Turn gun to target
-                turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
-                // Fire hard!
-                if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
-                    fire(3);
-                }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
-                    fire(1.0D);
-                }
             }
         } // Set our colors
         else if (e.getMessage() instanceof RobotColors) {
