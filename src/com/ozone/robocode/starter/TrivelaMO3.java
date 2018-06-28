@@ -5,6 +5,7 @@ import com.ozone.robocode.utils.RobotPosition;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.MessageEvent;
+import robocode.RobotDeathEvent;
 import robocode.tma.TTeamMemberRobot;
 
 import static robocode.util.Utils.normalRelativeAngleDegrees;
@@ -15,6 +16,8 @@ public class TrivelaMO3 extends TTeamMemberRobot{
     RobotPosition thirdPoint;
     RobotPosition fourthPoint;
     RobotPosition myPos;
+    RobotPosition enemyPos = null;
+    RobotPosition deathRobot =  new RobotPosition(0,0);
 
     @Override
     public void run() {
@@ -33,7 +36,7 @@ public class TrivelaMO3 extends TTeamMemberRobot{
             thirdPoint = new RobotPosition(300,300);
             fourthPoint = new RobotPosition(800,300);
         }
-        this.goTo(startPoint);
+//        this.goTo(startPoint);
         while (true){
             goTo(secondPoint);
             goTo(thirdPoint);
@@ -65,18 +68,40 @@ public class TrivelaMO3 extends TTeamMemberRobot{
         if (e.getMessage() instanceof RobotPosition) {
             myPos = new RobotPosition(this.getX(),this.getY());
             RobotPosition enemy = (RobotPosition) e.getMessage();
-            // Calculate x and y to target
-            double dx = enemy.getX() - this.getX();
-            double dy = enemy.getY() - this.getY();
-            // Calculate angle to target
-            double theta = Math.toDegrees(Math.atan2(dx, dy));
-            // Turn gun to target
-            turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
-            // Fire hard!
-            if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
-                fire(3);
-            }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
-                fire(1.0D);
+            if(enemy.getName().equals(deathRobot.getName())){
+                enemyPos = null;
+                return;
+            }
+            if(enemyPos != null){
+                if(enemyPos.getName().equals(enemy.getName())){
+                    double dx = enemy.getX() - this.getX();
+                    double dy = enemy.getY() - this.getY();
+                    // Calculate angle to target
+                    double theta = Math.toDegrees(Math.atan2(dx, dy));
+                    // Turn gun to target
+                    turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+                    // Fire hard!
+                    if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
+                        fire(3);
+                    }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
+                        fire(1.0D);
+                    }
+                }
+            }else {
+                deathRobot.setName("");
+                enemyPos = enemy;
+                double dx = enemy.getX() - this.getX();
+                double dy = enemy.getY() - this.getY();
+                // Calculate angle to target
+                double theta = Math.toDegrees(Math.atan2(dx, dy));
+                // Turn gun to target
+                turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+                // Fire hard!
+                if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <= 200){
+                    fire(3);
+                }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy) > 200){
+                    fire(1.0D);
+                }
             }
         } // Set our colors
         else if (e.getMessage() instanceof RobotColors) {
@@ -109,12 +134,10 @@ public class TrivelaMO3 extends TTeamMemberRobot{
     }
 
     @Override
-    public void onHitWall(HitWallEvent e) {
-        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
-            this.turnRight(90);
-
-        } else {
-            this.back(100);
+    public void onRobotDeath(RobotDeathEvent event) {
+        if(enemyPos.getName().equals(event.getName())){
+            deathRobot.setName(event.getName());
+            enemyPos = null;
         }
     }
 
