@@ -17,9 +17,8 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
 
     @Override
     public void onRun() {
-        RobotColors robotColorDefault = RobotColors.getRobotColorDefault();
-        RobotColors.setColorTeamRobot(this, robotColorDefault);
-        broadCastToDroid(robotColorDefault);
+        RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorCaptain());
+        broadCastToDroid(RobotColors.getRobotColorDroid());
 
         ahead(40);
 
@@ -61,6 +60,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     }
 
     private void randomMove() {
+        setMaxVelocity(Math.random() * 10);
         if ((int)(Math.random() * 10) % 2 == 0) {
             turnRight(Math.random() * 360);
         } else {

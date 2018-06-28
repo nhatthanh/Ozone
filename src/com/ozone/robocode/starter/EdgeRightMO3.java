@@ -29,14 +29,14 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
     @Override
     public void run() {
         ahead(50);
-        setMaxVelocity(4);
+        setMaxVelocity(7);
         turnLeft(- getHeading() + 90);
         ahead(10);
         turnRight(90);
-        ahead(getBattleFieldWidth() - getX() - 100);
+        ahead(getBattleFieldWidth() - getY() - 100);
         while (true) {
             turnLeft(180);
-            ahead(getBattleFieldWidth() - getX() - 150);
+            ahead(getBattleFieldWidth() - getY() - 150);
         }
     }
 }

@@ -29,7 +29,7 @@ public class EdgeLeftMO3 extends TTeamMemberRobot {
     @Override
     public void run() {
         ahead(50);
-        setMaxVelocity(4);
+        setMaxVelocity(7);
         turnRight(- getHeading() + 90);
         ahead(10);
         turnLeft(90);

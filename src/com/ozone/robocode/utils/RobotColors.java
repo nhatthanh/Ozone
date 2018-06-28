@@ -21,12 +21,22 @@ public class RobotColors implements Serializable {
         robot.setRadarColor(robotColors.radarColor);
     }
 
-    public static RobotColors getRobotColorDefault() {
+    public static RobotColors getRobotColorDroid() {
         RobotColors robotColors = new RobotColors();
         robotColors.bodyColor = Color.yellow;
-        robotColors.bulletColor = Color.green;
+        robotColors.bulletColor = Color.orange;
         robotColors.gunColor = Color.darkGray;
         robotColors.scanColor = Color.lightGray;
+        robotColors.radarColor = Color.white;
+        return robotColors;
+    }
+    
+    public static RobotColors getRobotColorCaptain() {
+        RobotColors robotColors = new RobotColors();
+        robotColors.bodyColor = Color.orange;
+        robotColors.bulletColor = Color.orange;
+        robotColors.gunColor = Color.red;
+        robotColors.scanColor = Color.yellow;
         robotColors.radarColor = Color.white;
         return robotColors;
     }
