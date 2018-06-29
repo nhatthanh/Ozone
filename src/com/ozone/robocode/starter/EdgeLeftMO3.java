@@ -10,6 +10,10 @@ import robocode.tma.TTeamMemberRobot;
 
 public class EdgeLeftMO3 extends TTeamMemberRobot {
 
+    RobotPosition point1;
+    RobotPosition point2;
+    RobotPosition point3;
+
     @Override
     public void onMessageReceived(MessageEvent event) {
         if (event.getMessage() instanceof RobotColors) {
@@ -25,18 +29,29 @@ public class EdgeLeftMO3 extends TTeamMemberRobot {
             fire(3);
         }
     }
-    
+
     @Override
     public void run() {
-        ahead(50);
-        setMaxVelocity(7);
-        turnRight(- getHeading() + 90);
-        ahead(10);
-        turnLeft(90);
-        ahead(getBattleFieldWidth() - getX() - 100);
-        while (true) {
-            turnRight(180);
-            ahead(getBattleFieldWidth() - getX() - 150);
+        setAdjustGunForRobotTurn(true);
+        setAdjustRadarForGunTurn(true);
+        setAdjustRadarForRobotTurn(true);
+        double borderRange = (float) getBattleFieldWidth() / 2;
+        this.setAdjustGunForRobotTurn(true);
+        if (getX() < borderRange) {
+            point1 = new RobotPosition(60, 120);
+            point2 = new RobotPosition(60, 970);
+            point3 = new RobotPosition(600, 970);
+
+        } else {
+            point1 = new RobotPosition(getBattleFieldWidth() - 60, getBattleFieldHeight() - 120);
+            point2 = new RobotPosition(getBattleFieldWidth() - 60, 60);
+            point3 = new RobotPosition(600, 60);
         }
+        while (true) {
+            RobotPosition.goTo(point1, this);
+            RobotPosition.goTo(point2, this);
+            RobotPosition.goTo(point3, this);
+        }
+
     }
 }

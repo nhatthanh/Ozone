@@ -86,7 +86,10 @@ public class MyRobot extends TTeamLeaderRobot {
 
         try {
             // Send enemy position to teammates
-            broadcastMessage(new RobotPosition(enemyX, enemyY));
+            RobotPosition robotPosition = new RobotPosition(enemyX, enemyY);
+            robotPosition.setEnergy(e.getEnergy());
+            robotPosition.setName(e.getName());
+            broadcastMessage(robotPosition);
 
         } catch (IOException ex) {
             out.println("Unable to send order: ");
