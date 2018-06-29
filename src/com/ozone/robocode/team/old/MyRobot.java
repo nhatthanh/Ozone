@@ -20,7 +20,7 @@ public class MyRobot extends TTeamLeaderRobot {
     double moveAmount;
     double enemyX;
     double enemyY;
-
+    RobotPosition enemy;
 
     public MyRobot(){
     }
@@ -67,26 +67,30 @@ public class MyRobot extends TTeamLeaderRobot {
         }
         double enemyBearing = this.getHeading() + e.getBearing();
 //             Calculate enemy's position
-            enemyX = getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
-            enemyY = getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
+        enemyX = getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
+        enemyY = getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
 
-            double dx = enemyX - this.getX();
-            double dy = enemyY - this.getY();
-            // Calculate angle to target
-            double theta = Math.toDegrees(Math.atan2(dx, dy));
+        double dx = enemyX - this.getX();
+        double dy = enemyY - this.getY();
+        // Calculate angle to target
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
 
-            // Turn gun to target
-            turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+        // Turn gun to target
+        turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
 //             Fire hard!
-            if(this.getEnergy() > 50){
-                fire(3);
-            }else if(this.getEnergy() <= 50){
-                fire(0.5D);
-            }
-
+        if(this.getEnergy() > 50){
+            fire(3);
+        }else if(this.getEnergy() <= 50){
+            fire(0.5D);
+        }
+        enemy = new RobotPosition(enemyX,enemyY);
+        enemy.setEnergy(e.getEnergy());
+        enemy.setName(e.getName());
+        enemy.setVerlocity(e.getVelocity());
         try {
             // Send enemy position to teammates
-            broadcastMessage(new RobotPosition(enemyX, enemyY));
+//            broadcastMessage(new RobotPosition(enemyX, enemyY));
+            broadcastMessage(enemy);
 
         } catch (IOException ex) {
             out.println("Unable to send order: ");
@@ -113,8 +117,9 @@ public class MyRobot extends TTeamLeaderRobot {
             this.ahead(100.0D);
         }
 
-        this.setMaxVelocity(100);
+        this.setMaxVelocity(10);
     }
+
 
     private void initialize() {
         this.setBodyColor(new Color(92, 51, 23));
