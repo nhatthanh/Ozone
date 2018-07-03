@@ -12,7 +12,7 @@ import com.ozone.robocode.utils.RobotPosition;
 public class WallyMO3 extends TTeamMemberRobot {
     boolean peek;
     double moveAmount;
-
+    RobotPosition myPos;
     public WallyMO3() {
     }
 
@@ -37,15 +37,16 @@ public class WallyMO3 extends TTeamMemberRobot {
     @Override
     public void onMessageReceived(MessageEvent e) {
         if (e.getMessage() instanceof RobotPosition) {
+            myPos = new RobotPosition(this.getX(), this.getY());
             RobotPosition p = (RobotPosition)e.getMessage();
             double dx = p.getX() - this.getX();
             double dy = p.getY() - this.getY();
             double theta = Math.toDegrees(Math.atan2(dx, dy));
             this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
-            if(this.getEnergy() > 50){
-                this.fire(3.0D);
-            }else if(this.getEnergy() <= 50){
-                this.fire(1.0D);
+            if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+                fire(3);
+            } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                fire(1.0D);
             }
 
         } else if (e.getMessage() instanceof RobotColors) {
@@ -64,11 +65,7 @@ public class WallyMO3 extends TTeamMemberRobot {
                 this.turnRight(90);
             }else{
                 this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
-                if(this.getEnergy() > 50){
-                    this.fire(3.0D);
-                }else if(this.getEnergy() <= 50){
-                    this.fire(1.0D);
-                }
+                fireGun();
                 this.back(100);
             }
 
@@ -78,17 +75,19 @@ public class WallyMO3 extends TTeamMemberRobot {
             }else{
 
                 this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
-                if(this.getEnergy() > 50){
-                    this.fire(3.0D);
-                }else if(this.getEnergy() <= 50){
-                    this.fire(1.0D);
-                }
+                fireGun();
                 this.ahead(100.0D);
             }
         }
     }
 
-
+    private void fireGun(){
+        if(this.getEnergy() > 50){
+            this.fire(3.0D);
+        }else if(this.getEnergy() <= 50){
+            this.fire(1.0D);
+        }
+    }
 
     @Override
     public void onHitByBullet(HitByBulletEvent e) {

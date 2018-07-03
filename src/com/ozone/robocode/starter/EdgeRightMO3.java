@@ -21,13 +21,16 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
         }
         if (event.getMessage() instanceof RobotPosition) {
             RobotPosition p = (RobotPosition) event.getMessage();
+            RobotPosition myPos = new RobotPosition(this.getX(), this.getY());
             double dx = p.getX() - this.getX();
             double dy = p.getY() - this.getY();
             double target = Math.toDegrees(Math.atan2(dx, dy));
             turnGunRight(normalRelativeAngleDegrees(target - getGunHeading()));
-
-            double energy = p.getPowerFire(this);
-            fire(energy);
+            if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+                fire(3);
+            } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                fire(1.0D);
+            }
         }
     }
 

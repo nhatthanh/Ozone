@@ -22,15 +22,15 @@ public class EdgeLeftMO3 extends TTeamMemberRobot {
         }
         if (event.getMessage() instanceof RobotPosition) {
             RobotPosition p = (RobotPosition) event.getMessage();
+            RobotPosition myPos = new RobotPosition(this.getX(), this.getY());
             double dx = p.getX() - this.getX();
             double dy = p.getY() - this.getY();
             double target = Math.toDegrees(Math.atan2(dx, dy));
             turnGunRight(normalRelativeAngleDegrees(target - getGunHeading()));
-
-            if(this.getEnergy() > 50){
+            if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
                 fire(3);
-            }else if(this.getEnergy() <= 50){
-                fire(0.5D);
+            } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                fire(1.0D);
             }
         }
     }
