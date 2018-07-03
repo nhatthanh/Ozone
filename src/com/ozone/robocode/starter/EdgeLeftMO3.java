@@ -5,6 +5,7 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 import com.ozone.robocode.utils.RobotColors;
 import com.ozone.robocode.utils.RobotPosition;
 
+import robocode.HitRobotEvent;
 import robocode.MessageEvent;
 import robocode.tma.TTeamMemberRobot;
 
@@ -57,5 +58,34 @@ public class EdgeLeftMO3 extends TTeamMemberRobot {
             RobotPosition.goTo(point3, this);
         }
 
+    }
+
+    @Override
+    public void onHitRobot(HitRobotEvent e) {
+        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
+            if(isTeammate(e.getName())){
+                this.turnRight(90);
+            }else{
+                this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+                fireGun();
+                this.back(100);
+            }
+
+        } else {
+            if(isTeammate(e.getName())){
+                this.turnRight(90);
+            }else{
+                this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+                fireGun();
+                this.ahead(100.0D);
+            }
+        }
+    }
+    private void fireGun(){
+        if(this.getEnergy() > 50){
+            this.fire(3.0D);
+        }else if(this.getEnergy() <= 50){
+            this.fire(1.0D);
+        }
     }
 }

@@ -54,11 +54,33 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
     }
 
     @Override
-    public void onHitRobot(HitRobotEvent event) {
-        if (!isTeammate(event.getName())) {
-            turnGunRight(normalRelativeAngleDegrees(event.getBearing() - getGunHeading()));
+    public void onHitRobot(HitRobotEvent e) {
+        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
+            if(isTeammate(e.getName())){
+                this.turnRight(90);
+            }else{
+                this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+                fireGun();
+                this.back(100);
+            }
+
+        } else {
+            if(isTeammate(e.getName())){
+                this.turnRight(90);
+            }else{
+                this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+                fireGun();
+                this.ahead(100.0D);
+            }
         }
-        go();
+    }
+
+    private void fireGun(){
+        if(this.getEnergy() > 50){
+            this.fire(3.0D);
+        }else if(this.getEnergy() <= 50){
+            this.fire(1.0D);
+        }
     }
 
     @Override

@@ -127,6 +127,8 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         }
     }
 
+
+
     @Override
     public void onHitByBullet(HitByBulletEvent e) {
         if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
