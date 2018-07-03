@@ -36,11 +36,25 @@ public class ActionPool {
         double distance = enemy.getDistance();
         
         if (distance > 600 && distance <= 800)
-            robot.fire(0.1);
-        else if (distance > 250 && distance <= 600)
             robot.fire(0.5);
-        else if (distance <= 250)
+        else if (distance > 200 && distance <= 600)
+            robot.fire(1);
+        else if (distance <= 200)
             robot.fire(3);
+    }
+    
+    public void fireMelee(TeamRobot robot, Target enemy) {
+        double dx = enemy.getX() - robot.getX();
+        double dy = enemy.getY() - robot.getY();
+        
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        
+        double distance = enemy.getDistance();
+        
+        if (distance <= 200) {
+            robot.turnGunRight(normalRelativeAngleDegrees(theta - robot.getGunHeading()));
+            robot.fire(3);
+        }
     }
     
     public void fireNormal(TeamRobot robot, Target enemy) {

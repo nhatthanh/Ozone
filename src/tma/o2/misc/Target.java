@@ -21,8 +21,9 @@ public class Target implements java.io.Serializable {
     private double heading = 0.0;
     private int priority = 0;
     private double energy = 0.0;
+    private String name = "";
 
-    public Target(double x, double y, double distance, double bearing, double heading, int priority, double energy) {
+    public Target(double x, double y, double distance, double bearing, double heading, int priority, double energy, String name) {
         this.x = x;
         this.y = y;
         this.distance = distance;
@@ -30,6 +31,7 @@ public class Target implements java.io.Serializable {
         this.heading = heading;
         this.priority = priority;
         this.energy = energy;
+        this.name = name;
     }
     
     public Target(Target another) {
@@ -40,6 +42,14 @@ public class Target implements java.io.Serializable {
         this.heading = another.heading;
         this.priority = another.priority;
         this.energy = another.energy;
+    }
+    
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public double getBearing() {

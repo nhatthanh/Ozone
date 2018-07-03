@@ -64,16 +64,6 @@ public class Leader extends TTeamLeaderRobot {
 
         double distance = enemy.getDistance();
 
-        // if (distance > 800)
-        // fire(5);
-        // else if (distance > 600 && distance <= 800)
-        // fire(4);
-        // else if (distance > 400 && distance <= 600)
-        // fire(3);
-        // else if (distance > 200 && distance <= 400)
-        // fire(2);
-        // else if (distance < 200)
-        // fire(1);
         fire(1);
     }
 
@@ -95,8 +85,9 @@ public class Leader extends TTeamLeaderRobot {
         double heading = e.getHeading();
         int priority = e.getPriority();
         double energy = e.getEnergy();
+        String name = e.getName();
 
-        Target enemy = new Target(enemyX, enemyY, distance, bearing, heading, priority, energy);
+        Target enemy = new Target(enemyX, enemyY, distance, bearing, heading, priority, energy, name);
         return enemy;
     }
 
@@ -134,7 +125,20 @@ public class Leader extends TTeamLeaderRobot {
         turnRight(degree);
 
         this.ahead(Math.sqrt(dx * dx + dy * dy));
+    }
 
+    public void onHitRobot(HitRobotEvent event) {
+        if (event.isMyFault()) {
+            if (isTeammate(event.getName())) {
+                back(100);
+            } else {
+                turnGunRight(event.getBearing());
+                fire(3);
+                ahead(100);
+                // trackingTarget = event.getName();
+                // moveStrategy = MOVE_STRATEGY.TRACKER;
+            }
+        }
     }
 
     private double distanceTo(double x, double y) {
