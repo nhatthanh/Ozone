@@ -43,10 +43,14 @@ public class WallyMO3 extends TTeamMemberRobot {
             double dy = p.getY() - this.getY();
             double theta = Math.toDegrees(Math.atan2(dx, dy));
             this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
-            if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
-                fire(3);
-            } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-                fire(1.0D);
+            if(p.getPower() == 0){
+                if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+                    fire(3);
+                } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                    fire(1.0D);
+                }
+            }else {
+                fire(p.getPower());
             }
 
         } else if (e.getMessage() instanceof RobotColors) {

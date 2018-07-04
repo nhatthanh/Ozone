@@ -108,10 +108,14 @@ public class TrivelaMO3 extends TTeamMemberRobot {
             // Turn gun to target
             turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
             // Fire hard!
-            if (this.getEnergy() > 50 && enemy.getDistance(myPos, enemy) <= 400) {
-                fire(3);
-            } else if (this.getEnergy() <= 50 || enemy.getDistance(myPos, enemy) > 400) {
-                fire(1.0D);
+            if(enemy.getPower() == 0){
+                if (this.getEnergy() > 50 && enemy.getDistance(myPos, enemy) <= 400) {
+                    fire(3);
+                } else if (this.getEnergy() <= 50 || enemy.getDistance(myPos, enemy) > 400) {
+                    fire(1.0D);
+                }
+            }else {
+                fire(enemy.getPower());
             }
         } // Set our colors
         else if (e.getMessage() instanceof RobotColors) {

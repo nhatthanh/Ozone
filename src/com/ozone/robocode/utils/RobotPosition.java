@@ -15,6 +15,7 @@ public class RobotPosition implements Serializable {
     private double energy;
     private double verlocity;
     private String name;
+    private double power = 0.0D;
 
     public RobotPosition(double var1, double var3) {
         this.x = var1;
@@ -51,6 +52,14 @@ public class RobotPosition implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public double getPower() {
+        return power;
+    }
+
+    public void setPower(double power) {
+        this.power = power;
     }
 
     public double getDistanceToEnemey(Robot robot) {

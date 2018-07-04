@@ -113,7 +113,9 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
             }
         }
         double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
-        broadCastToDroid(new RobotPosition(predictedX,predictedY));
+        RobotPosition enemy = new RobotPosition(predictedX,predictedY);
+        enemy.setPower(bulletPower);
+        broadCastToDroid(enemy);
         setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
         setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
         fire(bulletPower);
