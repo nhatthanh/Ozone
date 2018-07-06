@@ -7,17 +7,20 @@
  */
 package tma.o2.robot;
 
-import robocode.*;
-import robocode.tma.TTeamLeaderRobot;
-import tma.o2.action.ActionPool;
-import tma.o2.misc.*;
-import tma.o2.misc.Target;
-
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
+
+import robocode.HitByBulletEvent;
+import robocode.HitRobotEvent;
+import robocode.ScannedRobotEvent;
+import robocode.tma.TTeamLeaderRobot;
+import robocode.util.Utils;
+import tma.o2.action.ActionPool;
+import tma.o2.misc.RobotColors;
+import tma.o2.misc.Target;
 
 /**
  * MyFirstLeader - a sample team robot by Mathew Nelson.
@@ -29,121 +32,140 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Leader extends TTeamLeaderRobot {
 
-    private final Color LEADER_COLOR = Color.WHITE;
-    private final Color TEAM_COLOR = Color.BLACK;
-    private final Color GUN_COLOR = Color.WHITE;
+	private final Color LEADER_COLOR = Color.WHITE;
+	private final Color TEAM_COLOR = Color.BLACK;
+	private final Color GUN_COLOR = Color.WHITE;
 
-    private ActionPool action = new ActionPool();
+	private ActionPool action = new ActionPool();
 
-    public void onRun() {
-        setColor();
-        while (true) {
-            setTurnRadarRight(10000);
-            int x = getRandom(10, 900);
-            int y = getRandom(10, 900);
-            goTo(x, y);
-        }
-    }
+	//-----------------
+	//-----------------
+	// React function
+	//-----------------
+	//-----------------
 
-    public void onScannedRobot(ScannedRobotEvent e) {
-        if (isTeammate(e.getName())) {
-            return;
-        }
-        Target enemy = constructEnemyOnScanEvent(e);
+	public void onRun() {
+		setColor();
+		while (true) {
+			setTurnRadarRight(10000);
+			int x = getRandom(10, 1000);
+			int y = getRandom(10, 1000);
+			goTo(x, y);
+		}
+	}
 
-        fire(enemy);
-        sendMessage(enemy);
-    }
+	public void onScannedRobot(ScannedRobotEvent e) {
+		if (isTeammate(e.getName())) {
+			setTurnRadarRight(360);
+			return;
+		}
+		setTurnRadarRight(2.0 * Utils.normalRelativeAngleDegrees(getHeading() + e.getBearing() - getRadarHeading()));
+		Target enemy = constructEnemyOnScanEvent(e);
 
-    private void fire(Target enemy) {
-        double dx = enemy.getX() - this.getX();
-        double dy = enemy.getY() - this.getY();
+		sendMessage(enemy);
+		fire(enemy);
+	}
 
-        double theta = Math.toDegrees(Math.atan2(dx, dy));
-        turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+	private void fire(Target enemy) {
+		double dx = enemy.getX() - this.getX();
+		double dy = enemy.getY() - this.getY();
 
-        double distance = enemy.getDistance();
+		double theta = Math.toDegrees(Math.atan2(dx, dy));
+		turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
 
-        fire(1);
-    }
+		double distance = enemy.getDistance();
 
-    private void sendMessage(Target enemy) {
-        try {
-            broadcastMessage(enemy);
-        } catch (IOException ex) {
-            out.println("Unable to send order: ");
-            ex.printStackTrace(out);
-        }
-    }
+		fire(1);
+	}
 
-    private Target constructEnemyOnScanEvent(ScannedRobotEvent e) {
-        double enemyBearing = this.getHeading() + e.getBearing();
-        double enemyX = getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
-        double enemyY = getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
-        double distance = e.getDistance();
-        double bearing = e.getBearing();
-        double heading = e.getHeading();
-        int priority = e.getPriority();
-        double energy = e.getEnergy();
-        String name = e.getName();
+	private void sendMessage(Target enemy) {
+		try {
+			broadcastMessage(enemy);
+		} catch (IOException ex) {
+			out.println("Unable to send order: ");
+			ex.printStackTrace(out);
+		}
+	}
+	
+	public void onHitRobot(HitRobotEvent event) {
+		if (event.isMyFault()) {
+			if (isTeammate(event.getName())) {
+				back(100);
+			} else {
+				turnGunRight(event.getBearing());
+				fire(3);
+				ahead(100);
+			}
+		}
+	}
+	
+	public void onHitByBullet(HitByBulletEvent event) {
+//		setTurnRight(event.getBearing() - 90);
+//		setTurnRadarLeft(event.getBearing() - 90);
+//		ahead(100);
+	}
+	
+	//-----------------
+	//-----------------
+	// Helper function
+	//-----------------
+	//-----------------
 
-        Target enemy = new Target(enemyX, enemyY, distance, bearing, heading, priority, energy, name);
-        return enemy;
-    }
+	private Target constructEnemyOnScanEvent(ScannedRobotEvent e) {
+		double enemyBearing = this.getHeading() + e.getBearing();
+		double enemyX = getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
+		double enemyY = getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
+		double distance = e.getDistance();
+		double bearing = e.getBearing();
+		double heading = e.getHeading();
+		int priority = e.getPriority();
+		double energy = e.getEnergy();
+		String name = e.getName();
 
-    public int getRandom(int min, int max) {
-        return ThreadLocalRandom.current().nextInt(min, max + 1);
-    }
+		Target enemy = new Target(enemyX, enemyY, distance, bearing, heading, priority, energy, name);
+		return enemy;
+	}
 
-    private void setColor() {
-        RobotColors c = new RobotColors();
+	public int getRandom(int min, int max) {
+		return ThreadLocalRandom.current().nextInt(min, max + 1);
+	}
 
-        c.bodyColor = TEAM_COLOR;
-        c.gunColor = TEAM_COLOR;
-        c.radarColor = TEAM_COLOR;
-        c.scanColor = TEAM_COLOR;
-        c.bulletColor = GUN_COLOR;
+	private void setColor() {
+		RobotColors c = new RobotColors();
 
-        setBodyColor(LEADER_COLOR);
-        setGunColor(LEADER_COLOR);
-        setRadarColor(LEADER_COLOR);
-        setScanColor(LEADER_COLOR);
-        setBulletColor(GUN_COLOR);
-        try {
-            broadcastMessage(c);
-        } catch (IOException ignored) {
-        }
-    }
+		c.bodyColor = TEAM_COLOR;
+		c.gunColor = TEAM_COLOR;
+		c.radarColor = TEAM_COLOR;
+		c.scanColor = TEAM_COLOR;
+		c.bulletColor = GUN_COLOR;
 
-    private void goTo(double x, double y) {
+		setBodyColor(LEADER_COLOR);
+		setGunColor(LEADER_COLOR);
+		setRadarColor(LEADER_COLOR);
+		setScanColor(LEADER_COLOR);
+		setBulletColor(GUN_COLOR);
+		try {
+			broadcastMessage(c);
+		} catch (IOException ignored) {
+		}
+	}
 
-        double dx = x - this.getX();
-        double dy = y - this.getY();
+	private void goTo(double x, double y) {
 
-        double theta = Math.toDegrees(Math.atan2(dx, dy));
-        double degree = normalRelativeAngleDegrees(theta - getHeading());
-        turnRight(degree);
+		double dx = x - this.getX();
+		double dy = y - this.getY();
 
-        this.ahead(Math.sqrt(dx * dx + dy * dy));
-    }
+		double theta = Math.toDegrees(Math.atan2(dx, dy));
+		double degree = normalRelativeAngleDegrees(theta - getHeading());
+		turnRight(degree);
+		double distance = Math.sqrt(dx * dx + dy * dy);
+		
+		this.ahead(Math.min(distance, 300));
+	}
 
-    public void onHitRobot(HitRobotEvent event) {
-        if (event.isMyFault()) {
-            if (isTeammate(event.getName())) {
-                back(100);
-            } else {
-                turnGunRight(event.getBearing());
-                fire(3);
-                ahead(100);
-                // trackingTarget = event.getName();
-                // moveStrategy = MOVE_STRATEGY.TRACKER;
-            }
-        }
-    }
-
-    private double distanceTo(double x, double y) {
-        double dx = x - this.getX();
-        double dy = x - this.getY();
-        return Math.sqrt(dx * dx + dy * dy);
-    }
+	private double distanceTo(double x, double y) {
+		double dx = x - this.getX();
+		double dy = x - this.getY();
+		return Math.sqrt(dx * dx + dy * dy);
+	}
 }

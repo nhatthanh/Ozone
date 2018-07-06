@@ -4,6 +4,7 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import robocode.BulletHitEvent;
 import robocode.HitRobotEvent;
 import robocode.MessageEvent;
 import robocode.RobotDeathEvent;
@@ -27,17 +28,17 @@ public class Annihilator extends TTeamMemberRobot {
     public void run() {
         battleFieldHeight = getBattleFieldHeight();
         battleFieldWidth = getBattleFieldWidth();
-        ahead(200);
-        while (true) {
-            switch (moveStrategy) {
-            case RANDOMIZE:
-                moveRandom();
-                break;
-            case TRACKER:
-                ahead(5);
-                break;
-            }
-        }
+        moveRandom();
+//        while (true) {
+//            switch (moveStrategy) {
+//            case RANDOMIZE:
+//                moveRandom();
+//                break;
+//            case TRACKER:
+//                ahead(5);
+//                break;
+//            }
+//        }
     }
 
     // Strategy function
@@ -55,21 +56,11 @@ public class Annihilator extends TTeamMemberRobot {
     // React function
 
     public void onMessageReceived(MessageEvent e) {
-
         if (e.getMessage() instanceof Target) {
-            Target target = constructTarget((Target) e.getMessage());
-
-            switch (moveStrategy) {
-            case RANDOMIZE:
-                action.fireNear(this, target);
-                break;
-            case TRACKER:
-                if (target.getName().equals(trackingTarget)) {
-                    moveTracking(target);
-                }
-                action.fireNear(this, target);
-                break;
-            }
+        	if (getGunHeat() == 0) {
+	            Target target = constructTarget((Target) e.getMessage());
+	            action.fireNear(this, target);
+        	}
         }
 
         if (e.getMessage() instanceof RobotColors) {
@@ -85,13 +76,20 @@ public class Annihilator extends TTeamMemberRobot {
 
     public void onHitRobot(HitRobotEvent event) {
         if (isTeammate(event.getName())) {
-            back(100);
+        	if (event.isMyFault()) {
+        		back(100);
+        	}
         } else {
             turnGunRight(event.getBearing());
             fire(3);
-            // trackingTarget = event.getName();
-            // moveStrategy = MOVE_STRATEGY.TRACKER;
         }
+    }
+    
+    public void onBulletHit(BulletHitEvent event){
+    	if (isTeammate(event.getName())) {
+    		setTurnRight(getGunHeading() + 70);
+    		ahead(150);
+    	}
     }
 
     // Helper function

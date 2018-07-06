@@ -55,6 +55,9 @@ public class Sniper extends TeamRobot implements Droid {
     public void onMessageReceived(MessageEvent e) {
         // Fire at a point
         if (e.getMessage() instanceof Target) {
+        	if (getGunHeat() != 0) {
+        		return;
+        	}
             Target p = (Target) e.getMessage();
             // Calculate x and y to target
             double dx = p.getX() - this.getX();

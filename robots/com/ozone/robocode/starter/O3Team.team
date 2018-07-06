@@ -1,0 +1,6 @@
+#Robocode robot team
+#Thu Jul 05 21:01:21 ICT 2018
+team.members=com.ozone.robocode.starter.EdgeLeftMO3*,com.ozone.robocode.starter.EdgeRightMO3*,com.ozone.robocode.starter.ThanhCaptainMO3*,com.ozone.robocode.starter.TrivelaMO3*,com.ozone.robocode.starter.WallyMO3*
+team.author.name=
+robocode.version=1.9.2.6
+team.description=no description
