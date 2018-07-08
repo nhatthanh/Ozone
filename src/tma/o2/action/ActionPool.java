@@ -37,7 +37,7 @@ public class ActionPool {
         double dy = enemy.getY() - robot.getY();
         
         double theta = Math.toDegrees(Math.atan2(dx, dy));
-        robot.turnGunRight(normalRelativeAngleDegrees(theta - robot.getGunHeading()));
+        robot.setTurnGunRight(normalRelativeAngleDegrees(theta - robot.getGunHeading()));
         
         double distance = distanceTo(robot, enemy.getX(), enemy.getY());
         
@@ -101,13 +101,13 @@ public class ActionPool {
     	robot.setTurnRightRadians(Math.tan(a = Math.atan2(x -= (int) robot.getX(), y -= (int) robot.getY()) - robot.getHeadingRadians()));
     	double distance = Math.hypot(x, y) * Math.cos(a);
     	if (distance > 80) {
-    		robot.ahead(distance / 2);
+    		robot.setAhead(distance / 2);
     	}
     }
     
     private double distanceTo(TeamRobot robot, double x, double y) {
-		double dx = x - robot.getX();
-		double dy = x - robot.getY();
+		double dx = Math.abs(x - robot.getX());
+		double dy = Math.abs(x - robot.getY());
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 }

@@ -30,7 +30,7 @@ import tma.o2.misc.Target;
  * @author Mathew A. Nelson (original)
  * @author Flemming N. Larsen (contributor)
  */
-public class Leader extends TTeamLeaderRobot {
+public class Necromancer extends TTeamLeaderRobot {
 
 	private final Color LEADER_COLOR = Color.WHITE;
 	private final Color TEAM_COLOR = Color.BLACK;
@@ -45,12 +45,13 @@ public class Leader extends TTeamLeaderRobot {
 	//-----------------
 
 	public void onRun() {
-		setColor();
+		init();
 		while (true) {
-			setTurnRadarRight(10000);
+			setTurnRadarRight(360);
 			int x = getRandom(10, 1000);
 			int y = getRandom(10, 1000);
 			goTo(x, y);
+			execute();
 		}
 	}
 
@@ -61,7 +62,6 @@ public class Leader extends TTeamLeaderRobot {
 		}
 		setTurnRadarRight(2.0 * Utils.normalRelativeAngleDegrees(getHeading() + e.getBearing() - getRadarHeading()));
 		Target enemy = constructEnemyOnScanEvent(e);
-
 		sendMessage(enemy);
 		fire(enemy);
 	}
@@ -71,11 +71,11 @@ public class Leader extends TTeamLeaderRobot {
 		double dy = enemy.getY() - this.getY();
 
 		double theta = Math.toDegrees(Math.atan2(dx, dy));
-		turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+		setTurnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
 
 		double distance = enemy.getDistance();
 
-		fire(1);
+		setFire(1);
 	}
 
 	private void sendMessage(Target enemy) {
@@ -89,20 +89,28 @@ public class Leader extends TTeamLeaderRobot {
 	
 	public void onHitRobot(HitRobotEvent event) {
 		if (event.isMyFault()) {
-			if (isTeammate(event.getName())) {
-				back(100);
-			} else {
-				turnGunRight(event.getBearing());
-				fire(3);
-				ahead(100);
-			}
+			setBack(100);
 		}
 	}
 	
 	public void onHitByBullet(HitByBulletEvent event) {
-//		setTurnRight(event.getBearing() - 90);
-//		setTurnRadarLeft(event.getBearing() - 90);
-//		ahead(100);
+		double bearing = event.getBearing();
+		if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
+			return;
+		}
+		boolean front = Math.abs(bearing) < 45 ? true : false;
+		boolean right = bearing > 0 ? true : false;
+		if (bearing > 135) {
+			bearing = 180 - bearing;
+		}
+		if (front && right || !front && !right) {
+			setTurnLeft(60 - bearing);
+			setAhead(150);
+		}
+		if (front && !right || !front && right) {
+			setTurnRight(bearing + 60);
+			setAhead(150);
+		}
 	}
 	
 	//-----------------
@@ -110,6 +118,13 @@ public class Leader extends TTeamLeaderRobot {
 	// Helper function
 	//-----------------
 	//-----------------
+	
+	private void init() {
+		setColor();
+		setAdjustGunForRobotTurn(true);
+		setAdjustRadarForRobotTurn(true);
+		setAdjustRadarForGunTurn(true);
+	}
 
 	private Target constructEnemyOnScanEvent(ScannedRobotEvent e) {
 		double enemyBearing = this.getHeading() + e.getBearing();
@@ -160,7 +175,7 @@ public class Leader extends TTeamLeaderRobot {
 		turnRight(degree);
 		double distance = Math.sqrt(dx * dx + dy * dy);
 		
-		this.ahead(Math.min(distance, 300));
+		setAhead(Math.min(distance, 300));
 	}
 
 	private double distanceTo(double x, double y) {
