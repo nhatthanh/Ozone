@@ -10,6 +10,7 @@ package tma.o2.robot;
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -38,11 +39,11 @@ public class Necromancer extends TTeamLeaderRobot {
 
 	private ActionPool action = new ActionPool();
 
-	//-----------------
-	//-----------------
+	// -----------------
+	// -----------------
 	// React function
-	//-----------------
-	//-----------------
+	// -----------------
+	// -----------------
 
 	public void onRun() {
 		init();
@@ -63,7 +64,8 @@ public class Necromancer extends TTeamLeaderRobot {
 		setTurnRadarRight(2.0 * Utils.normalRelativeAngleDegrees(getHeading() + e.getBearing() - getRadarHeading()));
 		Target enemy = constructEnemyOnScanEvent(e);
 		sendMessage(enemy);
-		fire(enemy);
+//		fire(enemy);
+		circularFire(e);
 	}
 
 	private void fire(Target enemy) {
@@ -74,8 +76,54 @@ public class Necromancer extends TTeamLeaderRobot {
 		setTurnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
 
 		double distance = enemy.getDistance();
+		if (distance > 500) {
+			if (getEnergy() > 20) {
+				setFire(0.5);
+			}
+		}
+		if (distance > 250 && distance <= 500) {
+			if (getEnergy() > 20) {
+				setFire(1);
+			}
+		}
+		if (distance <= 250) {
+			setFire(2.5);
+		}
+	}
 
-		setFire(1);
+	double oldEnemyHeading;
+	private void circularFire(ScannedRobotEvent e) {
+		double bulletPower = Math.min(3.0, getEnergy());
+		double myX = getX();
+		double myY = getY();
+		double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+		double enemyX = getX() + e.getDistance() * Math.sin(absoluteBearing);
+		double enemyY = getY() + e.getDistance() * Math.cos(absoluteBearing);
+		double enemyHeading = e.getHeadingRadians();
+		double enemyHeadingChange = enemyHeading - oldEnemyHeading;
+		double enemyVelocity = e.getVelocity();
+		oldEnemyHeading = enemyHeading;
+
+		double deltaTime = 0;
+		double battleFieldHeight = getBattleFieldHeight(), battleFieldWidth = getBattleFieldWidth();
+		double predictedX = enemyX, predictedY = enemyY;
+		while ((++deltaTime) * (20.0 - 3.0 * bulletPower) < Point2D.Double.distance(myX, myY, predictedX, predictedY)) {
+			predictedX += Math.sin(enemyHeading) * enemyVelocity;
+			predictedY += Math.cos(enemyHeading) * enemyVelocity;
+			enemyHeading += enemyHeadingChange;
+			if (predictedX < 18.0 || predictedY < 18.0 || predictedX > battleFieldWidth - 18.0
+					|| predictedY > battleFieldHeight - 18.0) {
+
+				predictedX = Math.min(Math.max(18.0, predictedX), battleFieldWidth - 18.0);
+				predictedY = Math.min(Math.max(18.0, predictedY), battleFieldHeight - 18.0);
+				break;
+			}
+		}
+		double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
+
+		setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
+		setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
+		setFire(3);
 	}
 
 	private void sendMessage(Target enemy) {
@@ -86,13 +134,13 @@ public class Necromancer extends TTeamLeaderRobot {
 			ex.printStackTrace(out);
 		}
 	}
-	
+
 	public void onHitRobot(HitRobotEvent event) {
 		if (event.isMyFault()) {
 			setBack(100);
 		}
 	}
-	
+
 	public void onHitByBullet(HitByBulletEvent event) {
 		double bearing = event.getBearing();
 		if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
@@ -112,13 +160,13 @@ public class Necromancer extends TTeamLeaderRobot {
 			setAhead(150);
 		}
 	}
-	
-	//-----------------
-	//-----------------
+
+	// -----------------
+	// -----------------
 	// Helper function
-	//-----------------
-	//-----------------
-	
+	// -----------------
+	// -----------------
+
 	private void init() {
 		setColor();
 		setAdjustGunForRobotTurn(true);
@@ -174,7 +222,7 @@ public class Necromancer extends TTeamLeaderRobot {
 		double degree = normalRelativeAngleDegrees(theta - getHeading());
 		turnRight(degree);
 		double distance = Math.sqrt(dx * dx + dy * dy);
-		
+
 		setAhead(Math.min(distance, 300));
 	}
 
