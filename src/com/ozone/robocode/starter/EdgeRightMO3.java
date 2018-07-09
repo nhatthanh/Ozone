@@ -26,14 +26,10 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
             double dy = p.getY() - this.getY();
             double target = Math.toDegrees(Math.atan2(dx, dy));
             turnGunRight(normalRelativeAngleDegrees(target - getGunHeading()));
-            if(p.getPower() == 0){
                 if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
-                    fire(3);
+                    setFire(3);
                 } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-                    fire(1.0D);
-                }
-            }else {
-                fire(p.getPower());
+                    setFire(1.0D);
             }
         }
     }
@@ -84,9 +80,9 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
 
     private void fireGun(){
         if(this.getEnergy() > 50){
-            this.fire(3.0D);
+            this.setFire(3.0D);
         }else if(this.getEnergy() <= 50){
-            this.fire(1.0D);
+            this.setFire(1.0D);
         }
     }
 

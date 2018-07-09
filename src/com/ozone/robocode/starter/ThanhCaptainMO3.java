@@ -6,6 +6,7 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.ozone.robocode.utils.RobotColors;
 import com.ozone.robocode.utils.RobotPosition;
@@ -24,7 +25,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorCaptain());
         broadCastToDroid(RobotColors.getRobotColorDroid());
 
-        this.ahead(40);
+//        this.ahead(40);
 
         while (true) {
             randomMove();
@@ -49,7 +50,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         if (isTeammate(event.getName())) {
             return;
         }
-        if(numberEnemy == 1){
+        if(numberEnemy <= 2){
             linearTarget(event);
         }else {
             RobotPosition robotPosition = RobotPosition.getPoint(event, this);
@@ -114,51 +115,93 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         }
         double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
         RobotPosition enemy = new RobotPosition(predictedX,predictedY);
-        enemy.setPower(bulletPower);
+//        enemy.setNumberEnemy(numberEnemy);
         broadCastToDroid(enemy);
         setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
         setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
-        fire(bulletPower);
+        setFire(bulletPower);
     }
 
-    public void onHitRobot(HitRobotEvent e) {
-        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
-            this.back(100);
-        } else {
-            this.ahead(100);
+//    public void onHitRobot(HitRobotEvent e) {
+//        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
+//            this.back(100);
+//        } else {
+//            this.ahead(100);
+//        }
+//    }
+//
+//
+//
+//    @Override
+//    public void onHitByBullet(HitByBulletEvent e) {
+//        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
+//            this.turnRight(90);
+//            this.back(100.0D);
+//        } else {
+//            this.turnRight(90);
+//            this.ahead(100.0D);
+//        }
+//
+//        this.setMaxVelocity(10);
+//    }
+
+    public void onHitRobot(HitRobotEvent event) {
+        if (event.isMyFault()) {
+            setBack(100);
         }
     }
 
-
-
-    @Override
-    public void onHitByBullet(HitByBulletEvent e) {
-        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
-            this.turnRight(90);
-            this.back(100.0D);
-        } else {
-            this.turnRight(90);
-            this.ahead(100.0D);
+    public void onHitByBullet(HitByBulletEvent event) {
+        double bearing = event.getBearing();
+        if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
+            return;
         }
-
-        this.setMaxVelocity(10);
+        boolean front = Math.abs(bearing) < 45 ? true : false;
+        boolean right = bearing > 0 ? true : false;
+        if (bearing > 135) {
+            bearing = 180 - bearing;
+        }
+        if (front && right || !front && !right) {
+            setTurnLeft(60 - bearing);
+            setAhead(150);
+        }
+        if (front && !right || !front && right) {
+            setTurnRight(bearing + 60);
+            setAhead(150);
+        }
     }
 
 
     private void randomMove() {
 //        setMaxVelocity(5);
-        if ((int)(Math.random() * 10) % 2 == 0) {
-            turnRight(Math.random() * 360);
-        } else {
-            turnLeft(Math.random() * 360);
-        }
-        if ((int)(Math.random() * 10) % 2 == 0) {
-            ahead(Math.random() * 1000);
-        } else {
-            back(Math.random() * 1000);
-        }
+//        if ((int)(Math.random() * 10) % 2 == 0) {
+//            turnRight(Math.random() * 360);
+//        } else {
+//            turnLeft(Math.random() * 360);
+//        }
+//        if ((int)(Math.random() * 10) % 2 == 0) {
+//            ahead(Math.random() * 1000);
+//        } else {
+//            back(Math.random() * 1000);
+//        }
+        int x = getRandom(10, 1000);
+        int y = getRandom(10, 1000);
+        goTo(x, y);
+        execute();
     }
 
+    private void goTo(double x, double y) {
+
+        double dx = x - this.getX();
+        double dy = y - this.getY();
+
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        double degree = normalRelativeAngleDegrees(theta - getHeading());
+        turnRight(degree);
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        setAhead(Math.min(distance, 300));
+    }
 //    public int getRandom(int min, int max) {
 //        return ThreadLocalRandom.current().nextInt(min, max + 1);
 //    }
@@ -179,4 +222,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         return Math.hypot(x - this.getX(), y - this.getY());
     }
 
+    public int getRandom(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max + 1);
+    }
 }

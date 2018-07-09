@@ -3,13 +3,19 @@ package com.ozone.robocode.starter;
 import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.MessageEvent;
+import robocode.ScannedRobotEvent;
 import robocode.tma.TTeamMemberRobot;
 import robocode.util.Utils;
 import com.ozone.robocode.utils.RobotColors;
 import com.ozone.robocode.utils.RobotPosition;
 
+import java.awt.geom.Point2D;
+
 
 public class WallyMO3 extends TTeamMemberRobot {
+
+
+    private final int NUMBER_OF_ENEMY_LEFT = 2;
     boolean peek;
     double moveAmount;
     RobotPosition myPos;
@@ -39,19 +45,16 @@ public class WallyMO3 extends TTeamMemberRobot {
         if (e.getMessage() instanceof RobotPosition) {
             myPos = new RobotPosition(this.getX(), this.getY());
             RobotPosition p = (RobotPosition)e.getMessage();
-            double dx = p.getX() - this.getX();
-            double dy = p.getY() - this.getY();
-            double theta = Math.toDegrees(Math.atan2(dx, dy));
-            this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
-            if(p.getPower() == 0){
-                if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
-                    fire(3);
-                } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-                    fire(1.0D);
-                }
-            }else {
-                fire(p.getPower());
-            }
+                double dx = p.getX() - this.getX();
+                double dy = p.getY() - this.getY();
+                double theta = Math.toDegrees(Math.atan2(dx, dy));
+                this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
+                    if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+                        setFire(3);
+                    } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                        setFire(1.0D);
+                    }
+
 
         } else if (e.getMessage() instanceof RobotColors) {
             RobotColors c = (RobotColors)e.getMessage();
@@ -87,9 +90,9 @@ public class WallyMO3 extends TTeamMemberRobot {
 
     private void fireGun(){
         if(this.getEnergy() > 50){
-            this.fire(3.0D);
+            this.setFire(3.0D);
         }else if(this.getEnergy() <= 50){
-            this.fire(1.0D);
+            this.setFire(1.0D);
         }
     }
 
@@ -101,4 +104,38 @@ public class WallyMO3 extends TTeamMemberRobot {
             this.ahead(100.0D);
         }
     }
+
+//    private void linearTarget(RobotPosition e){
+//            double bulletPower = Math.min(3.0,getEnergy());
+//            double myX = getX();
+//            double myY = getY();
+//            double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+//            double enemyX = getX() + e.getDistance() * Math.sin(absoluteBearing);
+//            double enemyY = getY() + e.getDistance() * Math.cos(absoluteBearing);
+//            double enemyHeading = e.getHeadingRadians();
+//            double enemyVelocity = e.getVelocity();
+//            double deltaTime = 0;
+//            double battleFieldHeight = getBattleFieldHeight(),
+//                    battleFieldWidth = getBattleFieldWidth();
+//            double predictedX = enemyX, predictedY = enemyY;
+//            while((++deltaTime) * (20.0 - 3.0 * bulletPower) <
+//                    Point2D.Double.distance(myX, myY, predictedX, predictedY)){
+//                predictedX += Math.sin(enemyHeading) * enemyVelocity;
+//                predictedY += Math.cos(enemyHeading) * enemyVelocity;
+//                if(	predictedX < 18.0
+//                        || predictedY < 18.0
+//                        || predictedX > battleFieldWidth - 18.0
+//                        || predictedY > battleFieldHeight - 18.0){
+//                    predictedX = Math.min(Math.max(18.0, predictedX),
+//                            battleFieldWidth - 18.0);
+//                    predictedY = Math.min(Math.max(18.0, predictedY),
+//                            battleFieldHeight - 18.0);
+//                    break;
+//                }
+//            }
+//            double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
+//            setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
+//            setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
+//            setFire(bulletPower);
+//    }
 }

@@ -13,9 +13,13 @@ public class RobotPosition implements Serializable {
     private double x = 0.0D;
     private double y = 0.0D;
     private double energy;
-    private double verlocity;
+    private double velocity;
     private String name;
     private double power = 0.0D;
+    private int numberEnemy = 5;
+    private double bearingRadians;
+    private double headingRadians;
+    private double distance;
 
     public RobotPosition(double var1, double var3) {
         this.x = var1;
@@ -38,12 +42,12 @@ public class RobotPosition implements Serializable {
         this.energy = energy;
     }
 
-    public double getVerlocity() {
-        return verlocity;
+    public double getVelocity() {
+        return velocity;
     }
 
-    public void setVerlocity(double verlocity) {
-        this.verlocity = verlocity;
+    public void setVelocity(double verlocity) {
+        this.velocity = verlocity;
     }
 
     public String getName() {
@@ -60,6 +64,38 @@ public class RobotPosition implements Serializable {
 
     public void setPower(double power) {
         this.power = power;
+    }
+
+    public int getNumberEnemy() {
+        return numberEnemy;
+    }
+
+    public void setNumberEnemy(int numberEnemy) {
+        this.numberEnemy = numberEnemy;
+    }
+
+    public double getBearingRadians() {
+        return bearingRadians;
+    }
+
+    public void setBearingRadians(double bearingRadians) {
+        this.bearingRadians = bearingRadians;
+    }
+
+    public double getHeadingRadians() {
+        return headingRadians;
+    }
+
+    public void setHeadingRadians(double headingRadians) {
+        this.headingRadians = headingRadians;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 
     public double getDistanceToEnemey(Robot robot) {
@@ -84,7 +120,10 @@ public class RobotPosition implements Serializable {
         RobotPosition point = new RobotPosition(enemyX, enemyY);
         point.setName(e.getName());
         point.setEnergy(e.getEnergy());
-        point.setVerlocity(e.getVelocity());
+        point.setVelocity(e.getVelocity());
+        point.setBearingRadians(e.getBearingRadians());
+        point.setDistance(e.getDistance());
+        point.setHeadingRadians(e.getHeadingRadians());
         return point;
     }
 
