@@ -27,23 +27,33 @@ public class ActionPool {
     
     
     public void fireNear(TeamRobot robot, Target enemy) {
+    	// don't shoot while running low health
+    	if (robot.getEnergy() < 10) {
+    		if (getRandom(1, 100) > 10) {
+    			return;
+    		}
+    	}
         double dx = enemy.getX() - robot.getX();
         double dy = enemy.getY() - robot.getY();
         
         double theta = Math.toDegrees(Math.atan2(dx, dy));
-        robot.turnGunRight(normalRelativeAngleDegrees(theta - robot.getGunHeading()));
+        robot.setTurnGunRight(normalRelativeAngleDegrees(theta - robot.getGunHeading()));
         
-        double distance = enemy.getDistance();
+        double distance = distanceTo(robot, enemy.getX(), enemy.getY());
         
-        if (distance > 600 && distance <= 800)
+        if (distance > 600 && distance <= 800) {
             robot.fire(0.5);
-        else if (distance > 200 && distance <= 600)
+        }
+        else if (distance > 200 && distance <= 600) {
             robot.fire(1);
-        else if (distance <= 200)
+        }
+        else if (distance <= 200) {
             robot.fire(3);
+		}
+    	goNear(robot, enemy.getX(), enemy.getY());
     }
     
-    public void fireMelee(TeamRobot robot, Target enemy) {
+	public void fireMelee(TeamRobot robot, Target enemy) {
         double dx = enemy.getX() - robot.getX();
         double dy = enemy.getY() - robot.getY();
         
@@ -80,4 +90,24 @@ public class ActionPool {
         robot.setTurnRightRadians(Math.tan(a = Math.atan2(x -= (int) robot.getX(), y -= (int) robot.getY()) - robot.getHeadingRadians()));
         robot.setAhead(Math.hypot(x, y) * Math.cos(a));
     }
+    
+    private void goTo(TeamRobot robot, double x, double y) {
+    	double a;
+        robot.setTurnRightRadians(Math.tan(a = Math.atan2(x -= (int) robot.getX(), y -= (int) robot.getY()) - robot.getHeadingRadians()));
+        robot.setAhead(Math.hypot(x, y) * Math.cos(a));
+	}
+    private void goNear(TeamRobot robot, double x, double y) {
+    	double a;
+    	robot.setTurnRightRadians(Math.tan(a = Math.atan2(x -= (int) robot.getX(), y -= (int) robot.getY()) - robot.getHeadingRadians()));
+    	double distance = Math.hypot(x, y) * Math.cos(a);
+    	if (distance > 80) {
+    		robot.setAhead(distance / 2);
+    	}
+    }
+    
+    private double distanceTo(TeamRobot robot, double x, double y) {
+		double dx = Math.abs(x - robot.getX());
+		double dy = Math.abs(x - robot.getY());
+		return Math.sqrt(dx * dx + dy * dy);
+	}
 }

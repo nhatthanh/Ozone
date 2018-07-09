@@ -1,0 +1,10 @@
+#Battle Properties
+#Thu Jul 05 21:43:21 ICT 2018
+robocode.battle.sentryBorderSize=100
+robocode.battle.numRounds=10
+robocode.battleField.width=1024
+robocode.battle.gunCoolingRate=0.1
+robocode.battle.rules.inactivityTime=450
+robocode.battle.selectedRobots=tma.o2.robot.O2Team*,tma.o2.robot.O2Team*
+robocode.battle.hideEnemyNames=false
+robocode.battleField.height=1024
