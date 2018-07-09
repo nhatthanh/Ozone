@@ -120,7 +120,6 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         } // Set our colors
         else if (e.getMessage() instanceof RobotColors) {
             RobotColors c = (RobotColors) e.getMessage();
-
             setBodyColor(c.bodyColor);
             setGunColor(c.gunColor);
             setRadarColor(c.radarColor);
