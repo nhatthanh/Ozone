@@ -86,7 +86,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     }
 
     private void linearTarget(ScannedRobotEvent e){
-        double bulletPower = Math.min(3.0,getEnergy());
+        double bulletPower = Math.min(1.5,getEnergy());
         double myX = getX();
         double myY = getY();
         double absoluteBearing = getHeadingRadians() + e.getBearingRadians();

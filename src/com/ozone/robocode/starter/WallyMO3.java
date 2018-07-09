@@ -1,9 +1,6 @@
 package com.ozone.robocode.starter;
 
-import robocode.HitByBulletEvent;
-import robocode.HitRobotEvent;
-import robocode.MessageEvent;
-import robocode.ScannedRobotEvent;
+import robocode.*;
 import robocode.tma.TTeamMemberRobot;
 import robocode.util.Utils;
 import com.ozone.robocode.utils.RobotColors;
@@ -97,6 +94,13 @@ public class WallyMO3 extends TTeamMemberRobot {
     }
 
     @Override
+    public void onBulletHit(BulletHitEvent event) {
+        if(!isTeammate(event.getName())){
+            fireGun();
+        }
+    }
+
+    @Override
     public void onHitByBullet(HitByBulletEvent e) {
         if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
             this.back(100.0D);
@@ -104,6 +108,8 @@ public class WallyMO3 extends TTeamMemberRobot {
             this.ahead(100.0D);
         }
     }
+
+
 
 //    private void linearTarget(RobotPosition e){
 //            double bulletPower = Math.min(3.0,getEnergy());

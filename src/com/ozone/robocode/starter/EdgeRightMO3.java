@@ -5,10 +5,7 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 import com.ozone.robocode.utils.RobotColors;
 import com.ozone.robocode.utils.RobotPosition;
 
-import robocode.HitByBulletEvent;
-import robocode.HitRobotEvent;
-import robocode.HitWallEvent;
-import robocode.MessageEvent;
+import robocode.*;
 import robocode.tma.TTeamMemberRobot;
 
 public class EdgeRightMO3 extends TTeamMemberRobot {
@@ -101,5 +98,12 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
         RobotPosition.randomMove(this);
         int position = (int) (Math.random() * 100) % point.length;
         RobotPosition.goTo(point[position], this);
+    }
+
+    @Override
+    public void onBulletHit(BulletHitEvent event) {
+        if(!isTeammate(event.getName())){
+            fireGun();
+        }
     }
 }
