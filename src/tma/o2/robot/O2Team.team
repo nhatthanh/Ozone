@@ -1,8 +1,7 @@
 #Robocode robot team
 #Mon Jun 25 17:18:39 ICT 2018
 
-team.members=tma.o2.robot.Leader*,tma.o2.robot.Annihilator*
-,tma.o2.robot.Annihilator*,tma.o2.robot.Annihilator*,tma.o2.robot.Sniper*
+team.members=tma.o2.robot.Necromancer*,tma.o2.robot.Annihilator*,tma.o2.robot.Annihilator*,tma.o2.robot.Annihilator*,tma.o2.robot.Sniper*
 
 team.author.name=Le Quang Bao
 robocode.version=1.9.2.6
