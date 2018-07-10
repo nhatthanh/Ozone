@@ -6,6 +6,8 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.ozone.robocode.utils.RobotColors;
@@ -20,22 +22,27 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     double enemyX;
     double enemyY;
     int numberEnemy = 5;
+    RobotPosition enemy;
+    Set<String> enemyNameList  = new HashSet<>();
     @Override
     public void onRun() {
         RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorCaptain());
         broadCastToDroid(RobotColors.getRobotColorDroid());
+        setAdjustGunForRobotTurn(true);
+        setAdjustRadarForGunTurn(true);
+        setAdjustRadarForRobotTurn(true);
 
 //        this.ahead(40);
-
         while (true) {
+            setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
             randomMove();
         }
     }
 
-    @Override
-    public void onStatus(StatusEvent e) {
-        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
-    }
+//    @Override
+//    public void onStatus(StatusEvent e) {
+//        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+//    }
 
     private void broadCastToDroid(Serializable message) {
         try {
@@ -50,8 +57,11 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         if (isTeammate(event.getName())) {
             return;
         }
+        enemyNameList.add(event.getName());
+        numberEnemy = enemyNameList.size();
         if(numberEnemy <= 2){
             linearTarget(event);
+            broadCastToDroid(enemy);
         }else {
             RobotPosition robotPosition = RobotPosition.getPoint(event, this);
             broadCastToDroid(robotPosition);
@@ -61,7 +71,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
 
     @Override
     public void onEnemyDeath(RobotDeathEvent event) {
-        numberEnemy--;
+        enemyNameList.remove(event.getName());
     }
 
     private void captainFire(ScannedRobotEvent event){
@@ -81,45 +91,78 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         if(this.getEnergy() > 50){
             fire(3);
         }else if(this.getEnergy() <= 50){
-            fire(0.5D);
+            fire(1.5D);
         }
     }
 
+    double oldEnemyHeading;
     private void linearTarget(ScannedRobotEvent e){
-        double bulletPower = Math.min(1.5,getEnergy());
+//        double bulletPower = Math.min(1.5,getEnergy());
+////        double myX = getX();
+////        double myY = getY();
+////        double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+////        double enemyX = getX() + e.getDistance() * Math.sin(absoluteBearing);
+////        double enemyY = getY() + e.getDistance() * Math.cos(absoluteBearing);
+////        double enemyHeading = e.getHeadingRadians();
+////        double enemyVelocity = e.getVelocity();
+////        double deltaTime = 0;
+////        double battleFieldHeight = getBattleFieldHeight(),
+////                battleFieldWidth = getBattleFieldWidth();
+////        double predictedX = enemyX, predictedY = enemyY;
+////        while((++deltaTime) * (20.0 - 3.0 * bulletPower) <
+////                Point2D.Double.distance(myX, myY, predictedX, predictedY)){
+////            predictedX += Math.sin(enemyHeading) * enemyVelocity;
+////            predictedY += Math.cos(enemyHeading) * enemyVelocity;
+////            if(	predictedX < 18.0
+////                    || predictedY < 18.0
+////                    || predictedX > battleFieldWidth - 18.0
+////                    || predictedY > battleFieldHeight - 18.0){
+////                predictedX = Math.min(Math.max(18.0, predictedX),
+////                        battleFieldWidth - 18.0);
+////                predictedY = Math.min(Math.max(18.0, predictedY),
+////                        battleFieldHeight - 18.0);
+////                break;
+////            }
+////        }
+////        double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
+////        RobotPosition enemy = new RobotPosition(predictedX,predictedY);
+////        enemy.setNumberEnemy(numberEnemy);
+////        broadCastToDroid(enemy);
+////        setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
+////        setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
+////        setFire(bulletPower);
+        double bulletPower = Math.min(3.0, getEnergy());
         double myX = getX();
         double myY = getY();
         double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
         double enemyX = getX() + e.getDistance() * Math.sin(absoluteBearing);
         double enemyY = getY() + e.getDistance() * Math.cos(absoluteBearing);
         double enemyHeading = e.getHeadingRadians();
+        double enemyHeadingChange = enemyHeading - oldEnemyHeading;
         double enemyVelocity = e.getVelocity();
+        oldEnemyHeading = enemyHeading;
+
         double deltaTime = 0;
-        double battleFieldHeight = getBattleFieldHeight(),
-                battleFieldWidth = getBattleFieldWidth();
+        double battleFieldHeight = getBattleFieldHeight(), battleFieldWidth = getBattleFieldWidth();
         double predictedX = enemyX, predictedY = enemyY;
-        while((++deltaTime) * (20.0 - 3.0 * bulletPower) <
-                Point2D.Double.distance(myX, myY, predictedX, predictedY)){
+        while ((++deltaTime) * (20.0 - 3.0 * bulletPower) < Point2D.Double.distance(myX, myY, predictedX, predictedY)) {
             predictedX += Math.sin(enemyHeading) * enemyVelocity;
             predictedY += Math.cos(enemyHeading) * enemyVelocity;
-            if(	predictedX < 18.0
-                    || predictedY < 18.0
-                    || predictedX > battleFieldWidth - 18.0
-                    || predictedY > battleFieldHeight - 18.0){
-                predictedX = Math.min(Math.max(18.0, predictedX),
-                        battleFieldWidth - 18.0);
-                predictedY = Math.min(Math.max(18.0, predictedY),
-                        battleFieldHeight - 18.0);
+            enemyHeading += enemyHeadingChange;
+            if (predictedX < 18.0 || predictedY < 18.0 || predictedX > battleFieldWidth - 18.0
+                    || predictedY > battleFieldHeight - 18.0) {
+
+                predictedX = Math.min(Math.max(18.0, predictedX), battleFieldWidth - 18.0);
+                predictedY = Math.min(Math.max(18.0, predictedY), battleFieldHeight - 18.0);
                 break;
             }
         }
         double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
-        RobotPosition enemy = new RobotPosition(predictedX,predictedY);
-//        enemy.setNumberEnemy(numberEnemy);
-        broadCastToDroid(enemy);
         setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
         setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
-        setFire(bulletPower);
+        setFire(3);
+        enemy = new RobotPosition(predictedX,predictedY);
+        enemy.setNumberEnemy(numberEnemy);
     }
 
 //    public void onHitRobot(HitRobotEvent e) {
@@ -224,5 +267,10 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
 
     public int getRandom(int min, int max) {
         return ThreadLocalRandom.current().nextInt(min, max + 1);
+    }
+
+    @Override
+    public void onDeath(DeathEvent event) {
+        broadCastToDroid("dead");
     }
 }

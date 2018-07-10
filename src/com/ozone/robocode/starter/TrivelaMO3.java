@@ -10,6 +10,7 @@ import robocode.HitRobotEvent;
 import robocode.MessageEvent;
 import robocode.RobotDeathEvent;
 import robocode.tma.TTeamMemberRobot;
+import robocode.util.Utils;
 
 public class TrivelaMO3 extends TTeamMemberRobot {
     RobotPosition startPoint;
@@ -19,6 +20,8 @@ public class TrivelaMO3 extends TTeamMemberRobot {
     RobotPosition myPos;
     RobotPosition enemyPos = null;
     RobotPosition deathRobot = new RobotPosition(0, 0);
+    boolean melee = false;
+    RobotPosition target;
 
     @Override
     public void run() {
@@ -42,12 +45,15 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         }
         // this.goTo(startPoint);
         while (true) {
-//            RobotPosition.goTo(secondPoint, this);
-//            RobotPosition.goTo(thirdPoint, this);
-//            RobotPosition.goTo(fourthPoint, this);
-            goTo(secondPoint);
-            goTo(thirdPoint);
-            goTo(fourthPoint);
+            if(!melee){
+                goTo(secondPoint);
+                goTo(thirdPoint);
+                goTo(fourthPoint);
+            }else if(target != null) {
+                setMaxVelocity(8);
+                goTo(target);
+            }
+
         }
     }
 
@@ -62,61 +68,14 @@ public class TrivelaMO3 extends TTeamMemberRobot {
     public void onMessageReceived(MessageEvent e) {
         if (e.getMessage() instanceof RobotPosition) {
             myPos = new RobotPosition(this.getX(), this.getY());
-            RobotPosition enemy = (RobotPosition) e.getMessage();
-            // if(enemy.getName().equals(deathRobot.getName())){
-            // enemyPos = null;
-            // return;
-            // }
-            // if(enemyPos != null){
-            // if(enemyPos.getName().equals(enemy.getName())){
-            // double dx = enemy.getX() - this.getX();
-            // double dy = enemy.getY() - this.getY();
-            // // Calculate angle to target
-            // double theta = Math.toDegrees(Math.atan2(dx, dy));
-            // // Turn gun to target
-            // turnGunRight(normalRelativeAngleDegrees(theta -
-            // getGunHeading()));
-            // // Fire hard!
-            // if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <=
-            // 200){
-            // fire(3);
-            // }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy)
-            // > 200){
-            // fire(1.0D);
-            // }
-            // }
-            // }else {
-            // deathRobot.setName("");
-            // enemyPos = enemy;
-            // double dx = enemy.getX() - this.getX();
-            // double dy = enemy.getY() - this.getY();
-            // // Calculate angle to target
-            // double theta = Math.toDegrees(Math.atan2(dx, dy));
-            // // Turn gun to target
-            // turnGunRight(normalRelativeAngleDegrees(theta -
-            // getGunHeading()));
-            // // Fire hard!
-            // if(this.getEnergy() > 50 && enemy.getDistance(myPos,enemy) <=
-            // 200){
-            // fire(3);
-            // }else if(this.getEnergy() <= 50 || enemy.getDistance(myPos,enemy)
-            // > 200){
-            // fire(1.0D);
-            // }
-            // }
-
-            double dx = enemy.getX() - this.getX();
-            double dy = enemy.getY() - this.getY();
-            // Calculate angle to target
-            double theta = Math.toDegrees(Math.atan2(dx, dy));
-            // Turn gun to target
-            turnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
-            // Fire hard!
-                if (this.getEnergy() > 50 && enemy.getDistance(myPos, enemy) <= 400) {
-                    setFire(3);
-                } else if (this.getEnergy() <= 50 || enemy.getDistance(myPos, enemy) > 400) {
-                    setFire(1.0D);
-                }
+            RobotPosition p = (RobotPosition) e.getMessage();
+            if(p.getNumberEnemy() <= 2) {
+                melee = true;
+                target = p;
+                findEnemyPoint(p);
+            }else {
+                findEnemyPoint(p);
+            }
 
         } // Set our colors
         else if (e.getMessage() instanceof RobotColors) {
@@ -126,6 +85,8 @@ public class TrivelaMO3 extends TTeamMemberRobot {
             setRadarColor(c.radarColor);
             setScanColor(c.scanColor);
             setBulletColor(c.bulletColor);
+        }else if(e.getMessage().equals("dead")){
+            melee = false;
         }
     }
 
@@ -185,5 +146,16 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         }
     }
 
+    private void findEnemyPoint(RobotPosition p){
+        double dx = p.getX() - this.getX();
+        double dy = p.getY() - this.getY();
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
+        if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+            setFire(3);
+        } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+            setFire(1.0D);
+        }
+    }
 
 }

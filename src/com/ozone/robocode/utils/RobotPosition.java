@@ -127,7 +127,7 @@ public class RobotPosition implements Serializable {
         return point;
     }
 
-    public static void goTo(RobotPosition destination, Robot robot) {
+    public static void goTo(RobotPosition destination, AdvancedRobot robot) {
         // Calculate x and y to target
         double dx = destination.getX() - robot.getX();
         double dy = destination.getY() - robot.getY();
@@ -136,7 +136,7 @@ public class RobotPosition implements Serializable {
         // Turn gun to target and go to that point
         robot.turnGunRight(normalRelativeAngleDegrees(theta - robot.getHeading()));
         robot.turnRight(normalRelativeAngleDegrees(theta - robot.getHeading()));
-        robot.ahead(distanceTo(destination.getX(), destination.getY(), robot));
+        robot.setAhead(distanceTo(destination.getX(), destination.getY(), robot));
     }
 
     private static double distanceTo(double x, double y, Robot robot) {
