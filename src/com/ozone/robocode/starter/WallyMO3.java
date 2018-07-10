@@ -21,7 +21,7 @@ public class WallyMO3 extends TTeamMemberRobot {
     }
 
     @Override
-    public void run() {
+    public void onRun() {
         moveAmount = Math.max(this.getBattleFieldWidth(), this.getBattleFieldHeight()) - 100;
         turnLeft(this.getHeading() % 90.0D);
         ahead(this.moveAmount);
@@ -101,12 +101,23 @@ public class WallyMO3 extends TTeamMemberRobot {
         }
     }
 
-    @Override
-    public void onHitByBullet(HitByBulletEvent e) {
-        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
-            this.back(100.0D);
-        } else {
-            this.ahead(100.0D);
+    public void onHitByBullet(HitByBulletEvent event) {
+        double bearing = event.getBearing();
+        if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
+            return;
+        }
+        boolean front = Math.abs(bearing) < 45 ? true : false;
+        boolean right = bearing > 0 ? true : false;
+        if (bearing > 135) {
+            bearing = 180 - bearing;
+        }
+        if (front && right || !front && !right) {
+            turnLeft(60 - bearing);
+            ahead(150);
+        }
+        if (front && !right || !front && right) {
+            turnRight(bearing + 60);
+            ahead(150);
         }
     }
 

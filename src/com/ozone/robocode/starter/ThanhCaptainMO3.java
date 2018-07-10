@@ -22,27 +22,31 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     double enemyX;
     double enemyY;
     int numberEnemy = 5;
+    int numberMember = 5;
     RobotPosition enemy;
     Set<String> enemyNameList  = new HashSet<>();
+    boolean finishScan = false;
     @Override
     public void onRun() {
         RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorCaptain());
         broadCastToDroid(RobotColors.getRobotColorDroid());
-        setAdjustGunForRobotTurn(true);
-        setAdjustRadarForGunTurn(true);
-        setAdjustRadarForRobotTurn(true);
-
+//        setAdjustGunForRobotTurn(true);
+//        setAdjustRadarForGunTurn(true);
+//        setAdjustRadarForRobotTurn(true);
 //        this.ahead(40);
         while (true) {
-            setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
-            randomMove();
+//            randomMove();
+            int x = getRandom(10, 1000);
+            int y = getRandom(10, 1000);
+            goTo(x, y);
+            execute();
         }
     }
 
-//    @Override
-//    public void onStatus(StatusEvent e) {
-//        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
-//    }
+    @Override
+    public void onStatus(StatusEvent e) {
+        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+    }
 
     private void broadCastToDroid(Serializable message) {
         try {
@@ -59,13 +63,26 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         }
         enemyNameList.add(event.getName());
         numberEnemy = enemyNameList.size();
-        if(numberEnemy <= 2){
+        if(getTime() >= 250){
+            finishScan = true;
+        }
+        if(finishScan && numberEnemy <= 2){
             linearTarget(event);
             broadCastToDroid(enemy);
         }else {
             RobotPosition robotPosition = RobotPosition.getPoint(event, this);
             broadCastToDroid(robotPosition);
             captainFire(event);
+        }
+    }
+
+    @Override
+    public void onTeammateDeath(RobotDeathEvent event) {
+        numberMember--;
+        if(numberEnemy == 1){
+            setAdjustGunForRobotTurn(true);
+            setAdjustRadarForGunTurn(true);
+            setAdjustRadarForRobotTurn(true);
         }
     }
 

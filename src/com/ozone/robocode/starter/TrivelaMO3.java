@@ -123,13 +123,6 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         setAhead(Math.min(distance, 300));
     }
 
-    @Override
-    public void onRobotDeath(RobotDeathEvent event) {
-        if (enemyPos.getName().equals(event.getName())) {
-            deathRobot.setName(event.getName());
-            enemyPos = null;
-        }
-    }
 
     private void fireGun(){
         if(this.getEnergy() > 50){
