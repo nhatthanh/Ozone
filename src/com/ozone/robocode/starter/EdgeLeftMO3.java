@@ -33,6 +33,7 @@ public class EdgeLeftMO3 extends TTeamMemberRobot {
                 target = p;
                 findEnemyPoint(p);
             }else {
+                melee = false;
                 findEnemyPoint(p);
             }
         }else if(event.getMessage().equals("dead")){
@@ -115,7 +116,7 @@ public class EdgeLeftMO3 extends TTeamMemberRobot {
         turnRight(degree);
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        setAhead(Math.min(distance, 300));
+        ahead(Math.min(distance, 300));
     }
 
     private void findEnemyPoint(RobotPosition p){

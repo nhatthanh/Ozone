@@ -18,8 +18,6 @@ public class TrivelaMO3 extends TTeamMemberRobot {
     RobotPosition thirdPoint;
     RobotPosition fourthPoint;
     RobotPosition myPos;
-    RobotPosition enemyPos = null;
-    RobotPosition deathRobot = new RobotPosition(0, 0);
     boolean melee = false;
     RobotPosition target;
 
@@ -57,13 +55,6 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         }
     }
 
-    // private boolean isArrive(RobotPosition destination){
-    // myPos = new RobotPosition(this.getX(),this.getY());
-    // long x = Math.round(myPos.getX());
-    // long y = Math.round(myPos.getY());
-    // return x == destination.getX() && y == destination.getY();
-    // }
-
     @Override
     public void onMessageReceived(MessageEvent e) {
         if (e.getMessage() instanceof RobotPosition) {
@@ -74,6 +65,7 @@ public class TrivelaMO3 extends TTeamMemberRobot {
                 target = p;
                 findEnemyPoint(p);
             }else {
+                melee = false;
                 findEnemyPoint(p);
             }
 
@@ -90,23 +82,27 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         }
     }
 
-    @Override
     public void onHitRobot(HitRobotEvent e) {
         if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
-            if (isTeammate(e.getName())) {
+            if(isTeammate(e.getName())){
                 this.turnRight(90);
-            } else {
+            }else{
+                this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+                fireGun();
                 this.back(100);
             }
 
         } else {
-            if (isTeammate(e.getName())) {
+            if(isTeammate(e.getName())){
                 this.turnRight(90);
-            } else {
+            }else{
+                this.turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+                fireGun();
                 this.ahead(100.0D);
             }
         }
     }
+
 
     private void goTo(RobotPosition position) {
 
@@ -120,7 +116,7 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         turnRight(degree);
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        setAhead(Math.min(distance, 300));
+        ahead(Math.min(distance, 300));
     }
 
 

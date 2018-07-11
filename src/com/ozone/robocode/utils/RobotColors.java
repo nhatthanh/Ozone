@@ -30,6 +30,16 @@ public class RobotColors implements Serializable {
         robotColors.radarColor = Color.white;
         return robotColors;
     }
+
+    public static RobotColors getRobotColorDroidMelee() {
+        RobotColors robotColors = new RobotColors();
+        robotColors.bodyColor = Color.red;
+        robotColors.bulletColor = Color.magenta;
+        robotColors.gunColor = Color.darkGray;
+        robotColors.scanColor = Color.red;
+        robotColors.radarColor = Color.yellow;
+        return robotColors;
+    }
     
     public static RobotColors getRobotColorCaptain() {
         RobotColors robotColors = new RobotColors();

@@ -131,7 +131,7 @@ public class WallyMO3 extends TTeamMemberRobot {
         turnRight(degree);
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        setAhead(Math.min(distance, 300));
+        ahead(Math.min(distance, 300));
     }
 
     private void findEnemyPoint(RobotPosition p){
@@ -142,7 +142,7 @@ public class WallyMO3 extends TTeamMemberRobot {
         if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
             fire(3);
         } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-            fire(1.5D);
+            fire(2);
         }
     }
 }

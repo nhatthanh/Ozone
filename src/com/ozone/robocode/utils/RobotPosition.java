@@ -136,7 +136,7 @@ public class RobotPosition implements Serializable {
         // Turn gun to target and go to that point
         robot.turnGunRight(normalRelativeAngleDegrees(theta - robot.getHeading()));
         robot.turnRight(normalRelativeAngleDegrees(theta - robot.getHeading()));
-        robot.setAhead(distanceTo(destination.getX(), destination.getY(), robot));
+        robot.ahead(distanceTo(destination.getX(), destination.getY(), robot));
     }
 
     private static double distanceTo(double x, double y, Robot robot) {
