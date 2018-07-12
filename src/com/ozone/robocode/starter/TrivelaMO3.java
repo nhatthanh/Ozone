@@ -44,6 +44,7 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         // this.goTo(startPoint);
         while (true) {
             if(!melee){
+                goTo(startPoint);
                 goTo(secondPoint);
                 goTo(thirdPoint);
                 goTo(fourthPoint);

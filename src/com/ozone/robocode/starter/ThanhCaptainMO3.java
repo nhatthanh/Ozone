@@ -94,10 +94,6 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     @Override
     public void onEnemyDeath(RobotDeathEvent event) {
         enemyNameList.remove(event.getName());
-//        if(finishScan && numberEnemy <= 2){
-//            RobotColors robotColors = RobotColors.getRobotColorDroidMelee();
-//            broadCastToDroid(robotColors);
-//        }
     }
 
     private void captainFire(ScannedRobotEvent event){
