@@ -1,36 +1,41 @@
 package com.ozone.robocode.starter;
 
-import robocode.HitByBulletEvent;
-import robocode.HitRobotEvent;
-import robocode.MessageEvent;
+import robocode.*;
 import robocode.tma.TTeamMemberRobot;
 import robocode.util.Utils;
 import com.ozone.robocode.utils.RobotColors;
 import com.ozone.robocode.utils.RobotPosition;
 
+import java.awt.geom.Point2D;
+
+import static robocode.util.Utils.normalRelativeAngleDegrees;
+
 
 public class WallyMO3 extends TTeamMemberRobot {
-    boolean peek;
+
     double moveAmount;
     RobotPosition myPos;
+    boolean melee = false;
+    RobotPosition target;
     public WallyMO3() {
     }
 
     @Override
-    public void run() {
-        this.moveAmount = Math.max(this.getBattleFieldWidth(), this.getBattleFieldHeight()) - 100;
-        this.peek = false;
-        this.turnLeft(this.getHeading() % 90.0D);
-        this.ahead(this.moveAmount);
-        this.peek = true;
-        this.turnGunRight(90.0D);
-        this.turnRight(90.0D);
+    public void onRun() {
+        moveAmount = Math.max(this.getBattleFieldWidth(), this.getBattleFieldHeight()) - 100;
+        turnLeft(this.getHeading() % 90.0D);
+        ahead(this.moveAmount);
+        turnGunRight(90.0D);
+        turnRight(90.0D);
 
         while(true) {
-            this.peek = true;
-            this.ahead(this.moveAmount);
-            this.peek = false;
-            this.turnLeft(90.0D);
+            if(!melee){
+                ahead(this.moveAmount);
+                turnLeft(90.0D);
+            }else if(target != null) {
+                setMaxVelocity(8);
+                goTo(target.getX(),target.getY());
+            }
         }
     }
 
@@ -39,20 +44,14 @@ public class WallyMO3 extends TTeamMemberRobot {
         if (e.getMessage() instanceof RobotPosition) {
             myPos = new RobotPosition(this.getX(), this.getY());
             RobotPosition p = (RobotPosition)e.getMessage();
-            double dx = p.getX() - this.getX();
-            double dy = p.getY() - this.getY();
-            double theta = Math.toDegrees(Math.atan2(dx, dy));
-            this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
-            if(p.getPower() == 0){
-                if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
-                    fire(3);
-                } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-                    fire(1.0D);
-                }
+            if(p.getNumberEnemy() <= 2){
+                melee = true;
+                target = p;
+                findEnemyPoint(p);
             }else {
-                fire(p.getPower());
+                melee = false;
+                findEnemyPoint(p);
             }
-
         } else if (e.getMessage() instanceof RobotColors) {
             RobotColors c = (RobotColors)e.getMessage();
             this.setBodyColor(c.bodyColor);
@@ -60,6 +59,8 @@ public class WallyMO3 extends TTeamMemberRobot {
             this.setRadarColor(c.radarColor);
             this.setScanColor(c.scanColor);
             this.setBulletColor(c.bulletColor);
+        }else if(e.getMessage().equals("dead")){
+            melee = false;
         }
     }
 
@@ -89,16 +90,59 @@ public class WallyMO3 extends TTeamMemberRobot {
         if(this.getEnergy() > 50){
             this.fire(3.0D);
         }else if(this.getEnergy() <= 50){
-            this.fire(1.0D);
+            this.fire(1.5D);
         }
     }
 
     @Override
-    public void onHitByBullet(HitByBulletEvent e) {
-        if (e.getBearing() > -90.0D && e.getBearing() < 90.0D) {
-            this.back(100.0D);
-        } else {
-            this.ahead(100.0D);
+    public void onBulletHit(BulletHitEvent event) {
+        if(!isTeammate(event.getName())){
+            fireGun();
+        }
+    }
+
+    public void onHitByBullet(HitByBulletEvent event) {
+        double bearing = event.getBearing();
+        if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
+            return;
+        }
+        boolean front = Math.abs(bearing) < 45 ? true : false;
+        boolean right = bearing > 0 ? true : false;
+        if (bearing > 135) {
+            bearing = 180 - bearing;
+        }
+        if (front && right || !front && !right) {
+            turnLeft(60 - bearing);
+            ahead(150);
+        }
+        if (front && !right || !front && right) {
+            turnRight(bearing + 60);
+            ahead(150);
+        }
+    }
+
+    private void goTo(double x, double y) {
+
+        double dx = x - this.getX();
+        double dy = y - this.getY();
+
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        double degree = normalRelativeAngleDegrees(theta - getHeading());
+        turnRight(degree);
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        ahead(Math.min(distance, 300));
+    }
+
+    private void findEnemyPoint(RobotPosition p){
+        double dx = p.getX() - this.getX();
+        double dy = p.getY() - this.getY();
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
+        if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+            fire(3);
+        } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+            fire(2);
         }
     }
 }
