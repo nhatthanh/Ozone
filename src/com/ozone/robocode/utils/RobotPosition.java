@@ -16,7 +16,8 @@ public class RobotPosition implements Serializable {
     private double velocity;
     private String name;
     private double power = 0.0D;
-    private int numberEnemy = 5;
+    private boolean melee = false;
+    private boolean soloTeam = false;
     private double bearingRadians;
     private double headingRadians;
     private double distance;
@@ -66,14 +67,6 @@ public class RobotPosition implements Serializable {
         this.power = power;
     }
 
-    public int getNumberEnemy() {
-        return numberEnemy;
-    }
-
-    public void setNumberEnemy(int numberEnemy) {
-        this.numberEnemy = numberEnemy;
-    }
-
     public double getBearingRadians() {
         return bearingRadians;
     }
@@ -104,6 +97,22 @@ public class RobotPosition implements Serializable {
 
     public double getDistance(RobotPosition point1, RobotPosition point2) {
         return Math.sqrt(Math.pow((point1.x - point2.x), 2) + Math.pow((point1.y - point2.y), 2));
+    }
+
+    public boolean isMelee() {
+        return melee;
+    }
+
+    public void setMelee(boolean melee) {
+        this.melee = melee;
+    }
+
+    public boolean isSoloTeam() {
+        return soloTeam;
+    }
+
+    public void setSoloTeam(boolean soloTeam) {
+        this.soloTeam = soloTeam;
     }
 
     /**

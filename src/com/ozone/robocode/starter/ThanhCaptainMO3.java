@@ -24,6 +24,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     int numberEnemy = 5;
     int numberMember = 5;
     RobotPosition enemy;
+    String enemyLeader;
     Set<String> enemyNameList  = new HashSet<>();
     boolean finishScan = false;
     boolean melee = false;
@@ -41,11 +42,6 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
             }else {
                 randomMove();
             }
-
-            if(this.getEnergy() <= 1){
-                broadCastToDroid("dead");
-            }
-
         }
     }
 
@@ -67,11 +63,31 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         if (isTeammate(event.getName())) {
             return;
         }
+        RobotPosition robotPosition = RobotPosition.getPoint(event, this);
         enemyNameList.add(event.getName());
         numberEnemy = enemyNameList.size();
-        if(getTime() >= 250){
+        if(event.getEnergy() > 150){
+            enemyLeader = event.getName();
+        }
+        if(getTime() >= 150){
             finishScan = true;
         }
+
+        if(finishScan && numberEnemy == 1){
+            if(numberMember == 1){
+                melee = true;
+                linearTarget(event);
+            }else {
+                captainFire(event);
+                enemy.setSoloTeam(true);
+                broadCastToDroid(enemy);
+                if(robotPosition.getEnergy() == 0){
+                    goTo(robotPosition.getX(),robotPosition.getY());
+                }
+            }
+            return;
+        }
+
         if(finishScan && numberEnemy <= 2){
             RobotColors robotColors = RobotColors.getRobotColorDroidMelee();
             RobotColors.setColorTeamRobot(this,RobotColors.getRobotColorDroidMelee());
@@ -81,9 +97,9 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
             if(numberMember == 1){
                 melee = true;
             }
+
         }else {
             melee = false;
-            RobotPosition robotPosition = RobotPosition.getPoint(event, this);
             if(robotPosition.getX() > 1000 || robotPosition.getX() < 50 || robotPosition.getY() < 50 || robotPosition.getY() > 1000){
 //                setAdjustGunForRobotTurn(true);
 //                setAdjustRadarForGunTurn(true);
@@ -93,8 +109,11 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
             }else if(robotPosition.getEnergy() == 0){
                 goTo(robotPosition.getX(),robotPosition.getY());
             }else {
-                broadCastToDroid(robotPosition);
-                captainFire(event);
+                if(numberMember == 1){
+                    circularFire(event);
+                }else {
+                    broadCastToDroid(robotPosition);
+                }
             }
         }
     }
@@ -120,6 +139,8 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         enemyX = getX() + event.getDistance() * Math.sin(Math.toRadians(enemyBearing));
         enemyY = getY() + event.getDistance() * Math.cos(Math.toRadians(enemyBearing));
 
+        enemy = new RobotPosition(enemyX,enemyY);
+
         double dx = enemyX - this.getX();
         double dy = enemyY - this.getY();
         // Calculate angle to target
@@ -136,7 +157,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     }
 
     private void linearTarget(ScannedRobotEvent e){
-        double bulletPower = Math.min(1.5,getEnergy());
+        double bulletPower = Math.min(3.0D,getEnergy());
         double myX = getX();
         double myY = getY();
         double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
@@ -165,10 +186,19 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         }
         double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
         enemy = new RobotPosition(predictedX,predictedY);
-        enemy.setNumberEnemy(numberEnemy);
+        if(numberEnemy <= 2){
+            enemy.setMelee(true);
+        }else {
+            enemy.setMelee(false);
+        }
         setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
         setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
-        setFire(bulletPower);
+        if(this.getEnergy() > 50 || distanceTo(enemyX,enemyY) < 50){
+            setFire(3);
+        }else if(this.getEnergy() <= 50){
+            setFire(1.5D);
+        }
+//        setFire(bulletPower);
     }
 
     double oldEnemyHeading;
@@ -201,10 +231,18 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         }
         double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
         enemy = new RobotPosition(predictedX,predictedY);
-        enemy.setNumberEnemy(numberEnemy);
+        if(numberEnemy <= 2){
+            enemy.setMelee(true);
+        }else {
+            enemy.setMelee(false);
+        }
         setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
         setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
-        setFire(3);
+        if(this.getEnergy() > 50 || distanceTo(enemyX,enemyY) < 50){
+            setFire(3);
+        }else if(this.getEnergy() <= 50){
+            setFire(1.5D);
+        }
     }
 
 //    public void onHitRobot(HitRobotEvent e) {
@@ -261,11 +299,11 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         int x,y;
         double borderRange  = getBattleFieldWidth() / 2;
         if(startPointY < borderRange){
-            x = getRandom(10, 1000);
-            y = getRandom(10, 300);
+            x = getRandom(10, 500);
+            y = getRandom(10, 1000);
         }else{
-            x = getRandom(10, 1000);
-            y = getRandom(800, 1000);
+            x = getRandom(500, 990);
+            y = getRandom(10, 1000);
 
         }
         goTo(x, y);

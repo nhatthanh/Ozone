@@ -23,7 +23,7 @@ public class RobotColors implements Serializable {
 
     public static RobotColors getRobotColorDroid() {
         RobotColors robotColors = new RobotColors();
-        robotColors.bodyColor = Color.yellow;
+        robotColors.bodyColor = Color.yellow.darker();
         robotColors.bulletColor = Color.orange;
         robotColors.gunColor = Color.darkGray;
         robotColors.scanColor = Color.lightGray;
@@ -33,7 +33,7 @@ public class RobotColors implements Serializable {
 
     public static RobotColors getRobotColorDroidMelee() {
         RobotColors robotColors = new RobotColors();
-        robotColors.bodyColor = Color.red;
+        robotColors.bodyColor = Color.red.darker();
         robotColors.bulletColor = Color.magenta;
         robotColors.gunColor = Color.darkGray;
         robotColors.scanColor = Color.red;
@@ -43,7 +43,7 @@ public class RobotColors implements Serializable {
     
     public static RobotColors getRobotColorCaptain() {
         RobotColors robotColors = new RobotColors();
-        robotColors.bodyColor = Color.orange;
+        robotColors.bodyColor = Color.orange.darker();
         robotColors.bulletColor = Color.orange;
         robotColors.gunColor = Color.red;
         robotColors.scanColor = Color.yellow;

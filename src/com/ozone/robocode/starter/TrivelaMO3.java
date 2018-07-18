@@ -20,6 +20,7 @@ public class TrivelaMO3 extends TTeamMemberRobot {
     RobotPosition myPos;
     boolean melee = false;
     RobotPosition target;
+    boolean soloTeam = false;
 
     @Override
     public void run() {
@@ -43,6 +44,12 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         }
         // this.goTo(startPoint);
         while (true) {
+            if(soloTeam){
+                this.setMaxVelocity(8);
+                goToDestination(250,250);
+                goToDestination(500,250);
+                continue;
+            }
             if(!melee){
                 goTo(startPoint);
                 goTo(secondPoint);
@@ -61,12 +68,20 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         if (e.getMessage() instanceof RobotPosition) {
             myPos = new RobotPosition(this.getX(), this.getY());
             RobotPosition p = (RobotPosition) e.getMessage();
-            if(p.getNumberEnemy() <= 2) {
-                melee = true;
+            if(p.isMelee()){
+                melee = p.isMelee();
                 target = p;
                 findEnemyPoint(p);
             }else {
-                melee = false;
+                melee = p.isMelee();
+                findEnemyPoint(p);
+            }
+            if(p.isSoloTeam()){
+                soloTeam = p.isSoloTeam();
+                target = p;
+                findEnemyPoint(p);
+            }else {
+                soloTeam = p.isSoloTeam();
                 findEnemyPoint(p);
             }
 
@@ -120,6 +135,18 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         ahead(Math.min(distance, 300));
     }
 
+    private void goToDestination(double x, double y){
+        double dx = x - this.getX();
+        double dy = y - this.getY();
+
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        double degree = normalRelativeAngleDegrees(theta - getHeading());
+        turnRight(degree);
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        ahead(distance);
+    }
+
 
     private void fireGun(){
         if(this.getEnergy() > 50){
@@ -141,10 +168,14 @@ public class TrivelaMO3 extends TTeamMemberRobot {
         double dy = p.getY() - this.getY();
         double theta = Math.toDegrees(Math.atan2(dx, dy));
         this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
-        if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+        if(soloTeam){
             setFire(3);
-        } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-            setFire(1.0D);
+        }else {
+            if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+                setFire(3);
+            } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                setFire(1.5D);
+            }
         }
     }
 
