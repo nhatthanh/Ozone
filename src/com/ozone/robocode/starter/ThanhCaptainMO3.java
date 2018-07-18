@@ -26,12 +26,26 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
     RobotPosition enemy;
     Set<String> enemyNameList  = new HashSet<>();
     boolean finishScan = false;
+    boolean melee = false;
+    double startPointY;
     @Override
     public void onRun() {
         RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorCaptain());
         broadCastToDroid(RobotColors.getRobotColorDroid());
+        startPointY = getY();
         while (true) {
-            randomMove();
+            if(!melee){
+                randomMove();
+            }else if(enemy.getEnergy() < this.getEnergy()){
+                goTo(enemy.getX(),enemy.getY());
+            }else {
+                randomMove();
+            }
+
+            if(this.getEnergy() <= 1){
+                broadCastToDroid("dead");
+            }
+
         }
     }
 
@@ -64,7 +78,11 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
             broadCastToDroid(robotColors);
             linearTarget(event);
             broadCastToDroid(enemy);
+            if(numberMember == 1){
+                melee = true;
+            }
         }else {
+            melee = false;
             RobotPosition robotPosition = RobotPosition.getPoint(event, this);
             if(robotPosition.getX() > 1000 || robotPosition.getX() < 50 || robotPosition.getY() < 50 || robotPosition.getY() > 1000){
 //                setAdjustGunForRobotTurn(true);
@@ -240,8 +258,16 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
 
 
     private void randomMove() {
-        int x = getRandom(10, 1000);
-        int y = getRandom(10, 1000);
+        int x,y;
+        double borderRange  = getBattleFieldWidth() / 2;
+        if(startPointY < borderRange){
+            x = getRandom(10, 1000);
+            y = getRandom(10, 300);
+        }else{
+            x = getRandom(10, 1000);
+            y = getRandom(800, 1000);
+
+        }
         goTo(x, y);
         execute();
     }
@@ -269,6 +295,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
 
     @Override
     public void onDeath(DeathEvent event) {
-        broadCastToDroid("dead");
+        String dead = "dead";
+        broadCastToDroid(dead);
     }
 }

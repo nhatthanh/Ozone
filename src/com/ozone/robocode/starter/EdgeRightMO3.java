@@ -44,11 +44,13 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
         setAdjustRadarForRobotTurn(true);
         double borderRange = (float) getBattleFieldWidth() / 2;
         if (getY() < borderRange) {
+            goTo(300,200);
             point[0] = new RobotPosition(100, 60);
             point[1] = new RobotPosition(970, 60);
             point[2] = new RobotPosition(970, 600);
 
         } else {
+            goTo(700,800);
             point[0] = new RobotPosition(getBattleFieldWidth() - 100, getBattleFieldHeight() - 60);
             point[1] = new RobotPosition(60, getBattleFieldHeight() - 60);
             point[2] = new RobotPosition(60, 400);

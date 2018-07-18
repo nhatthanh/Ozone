@@ -101,25 +101,25 @@ public class WallyMO3 extends TTeamMemberRobot {
         }
     }
 
-    public void onHitByBullet(HitByBulletEvent event) {
-        double bearing = event.getBearing();
-        if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
-            return;
-        }
-        boolean front = Math.abs(bearing) < 45 ? true : false;
-        boolean right = bearing > 0 ? true : false;
-        if (bearing > 135) {
-            bearing = 180 - bearing;
-        }
-        if (front && right || !front && !right) {
-            turnLeft(60 - bearing);
-            ahead(150);
-        }
-        if (front && !right || !front && right) {
-            turnRight(bearing + 60);
-            ahead(150);
-        }
-    }
+//    public void onHitByBullet(HitByBulletEvent event) {
+//        double bearing = event.getBearing();
+//        if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
+//            return;
+//        }
+//        boolean front = Math.abs(bearing) < 45 ? true : false;
+//        boolean right = bearing > 0 ? true : false;
+//        if (bearing > 135) {
+//            bearing = 180 - bearing;
+//        }
+//        if (front && right || !front && !right) {
+//            turnLeft(60 - bearing);
+//            ahead(150);
+//        }
+//        if (front && !right || !front && right) {
+//            turnRight(bearing + 60);
+//            ahead(150);
+//        }
+//    }
 
     private void goTo(double x, double y) {
 
@@ -145,4 +145,5 @@ public class WallyMO3 extends TTeamMemberRobot {
             fire(2);
         }
     }
+
 }
