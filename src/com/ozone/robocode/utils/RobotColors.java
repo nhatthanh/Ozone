@@ -2,6 +2,7 @@ package com.ozone.robocode.utils;
 
 import java.awt.*;
 import java.io.Serializable;
+import java.util.Random;
 
 import robocode.Robot;
 
@@ -48,6 +49,23 @@ public class RobotColors implements Serializable {
         robotColors.gunColor = Color.red;
         robotColors.scanColor = Color.yellow;
         robotColors.radarColor = Color.white;
+        return robotColors;
+    }
+
+    public static RobotColors getRobotColorSoloTeam() {
+        Random random = new Random();
+        float r = random.nextFloat();
+        float g = random.nextFloat();
+        float b = random.nextFloat();
+        Color randColor = new Color(r,g,b);
+        randColor.brighter();
+
+        RobotColors robotColors = new RobotColors();
+        robotColors.bodyColor = randColor;
+        robotColors.bulletColor = Color.orange;
+        robotColors.gunColor = randColor;
+        robotColors.scanColor = Color.yellow;
+        robotColors.radarColor = randColor;
         return robotColors;
     }
 }

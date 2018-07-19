@@ -69,15 +69,17 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
         if(event.getEnergy() > 150){
             enemyLeader = event.getName();
         }
-        if(getTime() >= 150){
+        if(getTime() >= 200 && getTime() < 300){
             finishScan = true;
         }
 
         if(finishScan && numberEnemy == 1){
             if(numberMember == 1){
                 melee = true;
+                RobotColors.setColorTeamRobot(this,RobotColors.getRobotColorSoloTeam());
                 linearTarget(event);
             }else {
+                RobotColors.setColorTeamRobot(this,RobotColors.getRobotColorSoloTeam());
                 captainFire(event);
                 enemy.setSoloTeam(true);
                 broadCastToDroid(enemy);
@@ -90,7 +92,7 @@ public class ThanhCaptainMO3 extends TTeamLeaderRobot {
 
         if(finishScan && numberEnemy <= 2){
             RobotColors robotColors = RobotColors.getRobotColorDroidMelee();
-            RobotColors.setColorTeamRobot(this,RobotColors.getRobotColorDroidMelee());
+            RobotColors.setColorTeamRobot(this,RobotColors.getRobotColorSoloTeam());
             broadCastToDroid(robotColors);
             linearTarget(event);
             broadCastToDroid(enemy);
