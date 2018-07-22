@@ -59,8 +59,8 @@ public class Necromancer extends TTeamLeaderRobot {
 			return;
 		}
 		setTurnRadarRight(2.0 * Utils.normalRelativeAngleDegrees(getHeading() + e.getBearing() - getRadarHeading()));
-//		Target enemy = constructEnemyOnScanEvent(e);
-//		sendMessage(enemy);
+		Target enemy = constructEnemyOnScanEvent(e);
+		sendMessage(enemy);
 		circularFire(e);
 	}
 
@@ -99,14 +99,14 @@ public class Necromancer extends TTeamLeaderRobot {
 		setFire(3);
 	}
 
-//	private void sendMessage(Target enemy) {
-//		try {
-//			broadcastMessage(enemy);
-//		} catch (IOException ex) {
-//			out.println("Unable to send order: ");
-//			ex.printStackTrace(out);
-//		}
-//	}
+	private void sendMessage(Target enemy) {
+		try {
+			broadcastMessage(enemy);
+		} catch (IOException ex) {
+			out.println("Unable to send order: ");
+			ex.printStackTrace(out);
+		}
+	}
 
 	public void onHitRobot(HitRobotEvent event) {
 		if (event.isMyFault()) {
@@ -125,11 +125,11 @@ public class Necromancer extends TTeamLeaderRobot {
 			bearing = 180 - bearing;
 		}
 		if (front && right || !front && !right) {
-			setTurnLeft(60 - bearing);
+			turnLeft(60 - bearing);
 			setAhead(150);
 		}
 		if (front && !right || !front && right) {
-			setTurnRight(bearing + 60);
+			turnRight(bearing + 60);
 			setAhead(150);
 		}
 	}
@@ -147,23 +147,23 @@ public class Necromancer extends TTeamLeaderRobot {
 		setAdjustRadarForGunTurn(true);
 	}
 
-//	private Target constructEnemyOnScanEvent(ScannedRobotEvent e) {
-//		double enemyBearing = this.getHeading() + e.getBearing();
-//		double enemyX = getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
-//		double enemyY = getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
-//		double distance = e.getDistance();
-//		double bearing = e.getBearing();
-//		double bearingRadians = e.getBearingRadians();
-//		double heading = e.getHeading();
-//		double headingRadians = e.getHeadingRadians();
-//		int priority = e.getPriority();
-//		double energy = e.getEnergy();
-//		String name = e.getName();
-//		double velocity = e.getVelocity();
-//
-//		Target enemy = new Target(enemyX, enemyY, distance, bearing, heading, priority, energy, name, headingRadians, bearingRadians, velocity);
-//		return enemy;
-//	}
+	private Target constructEnemyOnScanEvent(ScannedRobotEvent e) {
+		double enemyBearing = this.getHeading() + e.getBearing();
+		double enemyX = getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
+		double enemyY = getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
+		double distance = e.getDistance();
+		double bearing = e.getBearing();
+		double bearingRadians = e.getBearingRadians();
+		double heading = e.getHeading();
+		double headingRadians = e.getHeadingRadians();
+		int priority = e.getPriority();
+		double energy = e.getEnergy();
+		String name = e.getName();
+		double velocity = e.getVelocity();
+
+		Target enemy = new Target(enemyX, enemyY, distance, bearing, bearingRadians, heading, headingRadians, priority, energy, name, velocity);
+		return enemy;
+	}
 
 	public int getRandom(int min, int max) {
 		return ThreadLocalRandom.current().nextInt(min, max + 1);
@@ -199,6 +199,6 @@ public class Necromancer extends TTeamLeaderRobot {
 		turnRight(degree);
 		double distance = Math.sqrt(dx * dx + dy * dy);
 
-		setAhead(Math.min(distance, 300));
+		setAhead(Math.max(distance, 500));
 	}
 }

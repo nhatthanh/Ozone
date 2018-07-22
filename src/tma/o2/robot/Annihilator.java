@@ -24,7 +24,11 @@ public class Annihilator extends TTeamMemberRobot {
 	public void run() {
 		battleFieldHeight = getBattleFieldHeight();
 		battleFieldWidth = getBattleFieldWidth();
-		ahead(100);
+		init();
+		ahead(300);
+		while(true) {
+			execute();
+		}
 	}
 
 	// -----------------
@@ -32,30 +36,30 @@ public class Annihilator extends TTeamMemberRobot {
 	// Strategy function
 	// -----------------
 	// -----------------
-
-	public void fireNear(TeamRobot robot, Target enemy) {
+	
+	public void fireNear(Target enemy) {
     	// don't shoot while running low health
-    	if (robot.getEnergy() < 10) {
+    	if (getEnergy() < 10) {
     		if (getRandom(1, 100) > 10) {
     			return;
     		}
     	}
-        double dx = enemy.getX() - robot.getX();
-        double dy = enemy.getY() - robot.getY();
+        double dx = enemy.getX() - getX();
+        double dy = enemy.getY() - getY();
         
         double theta = Math.toDegrees(Math.atan2(dx, dy));
-        robot.turnGunRight(normalRelativeAngleDegrees(theta - robot.getGunHeading()));
+        setTurnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
         
         double distance = distanceTo(enemy.getX(), enemy.getY());
         
         if (distance > 600) {
-            robot.fire(0.5);
+            fire(0.5);
         }
         else if (distance > 200 && distance <= 600) {
-            robot.fire(1.5);
+            fire(1.5);
         }
         else if (distance <= 200) {
-            robot.fire(3);
+            fire(3);
 		}
     }
 
@@ -67,35 +71,23 @@ public class Annihilator extends TTeamMemberRobot {
 
 	public void onMessageReceived(MessageEvent e) {
 		if (e.getMessage() instanceof Target) {
-			Target target = constructTarget((Target) e.getMessage());
-			if (getGunHeat() == 0) {
-				fireNear(this, target);
-			}
-//			goTo(target.getX(), target.getY());
+			Target target = (Target) e.getMessage();
+			goTo(target.getX(), target.getY());
+			fireNear(target);
 		}
 
 		if (e.getMessage() instanceof RobotColors) {
-			setColorForRobot(e);
 		}
 	}
 
 	public void onHitRobot(HitRobotEvent event) {
-		if (isTeammate(event.getName())) {
-			if (event.isMyFault()) {
-				back(100);
-				turnRight(60);
-				ahead(100);
-			}
-		} else {
-			turnGunRight(event.getBearing());
-			fire(3);
+		if (event.isMyFault()) {
+			back(100);
 		}
 	}
 
 	public void onBulletHit(BulletHitEvent event) {
 		if (isTeammate(event.getName())) {
-			turnRight(getGunHeading() + 70);
-			ahead(150);
 		}
 	}
 	
@@ -111,11 +103,11 @@ public class Annihilator extends TTeamMemberRobot {
 		}
 		if (front && right || !front && !right) {
 			turnLeft(60 - bearing);
-			ahead(150);
+			setAhead(150);
 		}
 		if (front && !right || !front && right) {
 			turnRight(bearing + 60);
-			ahead(150);
+			setAhead(150);
 		}
 	}
 
@@ -164,16 +156,9 @@ public class Annihilator extends TTeamMemberRobot {
 		double degree = normalRelativeAngleDegrees(theta - getHeading());
 		turnRight(degree);
 
-		this.ahead(Math.sqrt(dx * dx + dy * dy) /2);
+		this.setAhead(Math.sqrt(dx * dx + dy * dy) - 60);
 	}
 	
-    private void goNear(double x, double y) {
-    	double a;
-    	setTurnRightRadians(Math.tan(a = Math.atan2(x -= (int) getX(), y -= (int) getY()) - getHeadingRadians()));
-    	double distance = Math.hypot(x - getX(), y - getY());
-		setAhead(distance - 150);
-    }
-
 	private double distanceTo(double x, double y) {
 		double dx = x - this.getX();
 		double dy = x - this.getY();
