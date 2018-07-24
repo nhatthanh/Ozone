@@ -14,8 +14,10 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
+import robocode.BulletMissedEvent;
 import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
+import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 import robocode.tma.TTeamLeaderRobot;
 import robocode.util.Utils;
@@ -35,6 +37,21 @@ public class Necromancer extends TTeamLeaderRobot {
 	private final Color LEADER_COLOR = Color.WHITE;
 	private final Color TEAM_COLOR = Color.BLACK;
 	private final Color GUN_COLOR = Color.WHITE;
+	private double battleFieldWidth = 0;
+	private double battleFieldHeight = 0;
+	private String wallTarget = "";
+	private double maxEnergy = 0;
+	private double mediumEnergy = 0;
+	private double lowEnergy = 0;
+	private double criticalEnergy = 0;
+	private boolean startOnTop = true;
+
+	private static enum Strategy {
+		RANDOM, MELEE, WALL
+	}
+
+	private Strategy strategy = Strategy.RANDOM;
+	private String enemyLeaderName = "";
 
 	// -----------------
 	// -----------------
@@ -45,26 +62,93 @@ public class Necromancer extends TTeamLeaderRobot {
 	public void onRun() {
 		init();
 		while (true) {
-			setTurnRadarRight(360);
-			int x = getRandom(10, 1000);
-			int y = getRandom(10, 1000);
-			goTo(x, y);
-			execute();
+			if (getOthers() < 3 && getEnergy() > 100) {
+				if (strategy != Strategy.MELEE) {
+					strategy = Strategy.MELEE;
+				}
+			}
+			if (getEnergy() < mediumEnergy && getOthers() == 5) {
+				if (strategy != Strategy.WALL) {
+					strategy = Strategy.WALL;
+					if (getY() > 512) {
+						wallTarget = "BOTTOM";
+					} else {
+						wallTarget = "TOP";
+					}
+				}
+			}
+			if (getEnergy() < criticalEnergy) {
+				strategy = Strategy.RANDOM;
+			}
+			switch (strategy) {
+			case RANDOM:
+				moveRandom();
+				break;
+			case MELEE:
+				moveNear();
+				break;
+			case WALL:
+				moveWall();
+				break;
+			}
 		}
 	}
 
 	public void onScannedRobot(ScannedRobotEvent e) {
-		if (isTeammate(e.getName())) {
-			setTurnRadarRight(360);
-			return;
+		if (e.getEnergy() > 140) {
+			enemyLeaderName = e.getName();
 		}
+		double energy = getEnergy();
+		double distance = e.getDistance();
+		double enemyEnergy = e.getEnergy();
 		setTurnRadarRight(2.0 * Utils.normalRelativeAngleDegrees(getHeading() + e.getBearing() - getRadarHeading()));
-		Target enemy = constructEnemyOnScanEvent(e);
-		sendMessage(enemy);
-		circularFire(e);
+		double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+		double enemyX = getX() + e.getDistance() * Math.sin(absoluteBearing);
+		double enemyY = getY() + e.getDistance() * Math.cos(absoluteBearing);
+		double dx = enemyX - getX();
+		double dy = enemyY - getY();
+		double theta = Math.toDegrees(Math.atan2(dx, dy));
+
+		switch (strategy) {
+		case RANDOM:
+			if (energy > mediumEnergy || distance <= 250) {
+				circularFire(e);
+			}
+			if (energy <= mediumEnergy && energy > lowEnergy) {
+				if (distance < 300 || enemyEnergy < 30) {
+					circularFire(e);
+				}
+			}
+			if (energy <= lowEnergy && energy > criticalEnergy) {
+				if (distance < 200) {
+					circularFire(e);
+				}
+			}
+			if (energy < criticalEnergy && energy > 3) {
+				if (distance < 100) {
+					circularFire(e);
+				}
+			}
+			break;
+		case MELEE:
+			setTurnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+			goNear(enemyX, enemyY);
+			if (distance < 200) {
+				setFire(3);
+			} else {
+				setFire(1);
+			}
+			break;
+		case WALL:
+			if (getRandom(1, 100) < 4) {
+				setTurnGunRight(normalRelativeAngleDegrees(theta - getGunHeading()));
+				setFire(1);
+			}
+		}
 	}
 
 	double oldEnemyHeading;
+
 	private void circularFire(ScannedRobotEvent e) {
 		double bulletPower = Math.min(3.0, getEnergy());
 		double myX = getX();
@@ -99,15 +183,6 @@ public class Necromancer extends TTeamLeaderRobot {
 		setFire(3);
 	}
 
-	private void sendMessage(Target enemy) {
-		try {
-			broadcastMessage(enemy);
-		} catch (IOException ex) {
-			out.println("Unable to send order: ");
-			ex.printStackTrace(out);
-		}
-	}
-
 	public void onHitRobot(HitRobotEvent event) {
 		if (event.isMyFault()) {
 			setBack(100);
@@ -134,6 +209,53 @@ public class Necromancer extends TTeamLeaderRobot {
 		}
 	}
 
+	public void onEnemyDeath(RobotDeathEvent event) {
+		if (event.getName().equals(enemyLeaderName)) {
+			strategy = Strategy.MELEE;
+		}
+	}
+
+	// -----------------
+	// -----------------
+	// Strategy function
+	// -----------------
+	// -----------------
+
+	private void moveRandom() {
+		setMaxVelocity(8);
+		setTurnRadarRight(360);
+		int x = getRandom(10, 1000);
+		int y = getRandom(10, 1000);
+		goTo(x, y);
+		execute();
+	}
+
+	private void moveNear() {
+		setMaxVelocity(8);
+		setTurnRadarRight(360);
+		execute();
+	}
+
+	private void moveWall() {
+		setTurnRadarRight(360);
+		double startX = startOnTop ? 900 : 100;
+		double startY = startOnTop ? 900 : 100;
+		double endX = startOnTop ? 900 : 100;
+		double endY = startOnTop ? 100 : 900;
+		setMaxVelocity(4.5);
+		if (wallTarget.equals("BOTTOM")) {
+			if (getY() < 150) {
+				wallTarget = "TOP";
+			}
+			goWall(endX, endY);
+		} else {
+			if (getY() > 850) {
+				wallTarget = "BOTTOM";
+			}
+			goWall(startX, startY);
+		}
+	}
+
 	// -----------------
 	// -----------------
 	// Helper function
@@ -141,6 +263,13 @@ public class Necromancer extends TTeamLeaderRobot {
 	// -----------------
 
 	private void init() {
+		maxEnergy = getEnergy();
+		mediumEnergy = maxEnergy * 60 / 100;
+		lowEnergy = maxEnergy * 25 / 100;
+		criticalEnergy = maxEnergy * 10 / 100;
+		if (getX() < 500) {
+			startOnTop = false;
+		}
 		setColor();
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForRobotTurn(true);
@@ -161,7 +290,8 @@ public class Necromancer extends TTeamLeaderRobot {
 		String name = e.getName();
 		double velocity = e.getVelocity();
 
-		Target enemy = new Target(enemyX, enemyY, distance, bearing, bearingRadians, heading, headingRadians, priority, energy, name, velocity);
+		Target enemy = new Target(enemyX, enemyY, distance, bearing, bearingRadians, heading, headingRadians, priority,
+				energy, name, velocity);
 		return enemy;
 	}
 
@@ -200,5 +330,28 @@ public class Necromancer extends TTeamLeaderRobot {
 		double distance = Math.sqrt(dx * dx + dy * dy);
 
 		setAhead(Math.max(distance, 500));
+	}
+
+	private void goNear(double x, double y) {
+
+		double dx = x - this.getX();
+		double dy = y - this.getY();
+
+		double theta = Math.toDegrees(Math.atan2(dx, dy));
+		double degree = normalRelativeAngleDegrees(theta - getHeading());
+		turnRight(degree);
+
+		this.setAhead(Math.sqrt(dx * dx + dy * dy) - 60);
+	}
+
+	private void goWall(double x, double y) {
+
+		double dx = x - this.getX();
+		double dy = y - this.getY();
+
+		double theta = Math.toDegrees(Math.atan2(dx, dy));
+		double degree = normalRelativeAngleDegrees(theta - getHeading());
+		turnRight(degree);
+		this.setAhead(50);
 	}
 }
