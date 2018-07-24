@@ -27,6 +27,10 @@ public class CaptainMO3 extends TTeamLeaderRobot {
     Set<String> enemies = new HashSet<>();
     Set<String> teamMates = new HashSet<>();
     private boolean moveRandom = false;
+    private boolean isPlanB = false;
+    private int numberMember = 5;
+    private boolean melee = false;
+    private RobotPosition target = null;
 
     @Override
     public void onStatus(StatusEvent e) {
@@ -36,25 +40,33 @@ public class CaptainMO3 extends TTeamLeaderRobot {
     @Override
     public void onScannedRobot(ScannedRobotEvent event) {
         if (isTeammate(event.getName())) {
-            if (event.getEnergy() < 1) {
-                teamMates.remove(event.getName());
-                return;
-            }
-            teamMates.add(event.getName());
+            // if (event.getEnergy() < 1) {
+            // teamMates.remove(event.getName());
+            // return;
+            // }
+            // teamMates.add(event.getName());
             return;
         }
-        if (enemies.size() > 1) {
-            moveRandom = true;
-            broadCastToTeam("PLANB");
-        }
         enemies.add(event.getName());
+        if (!isPlanB) {
+            if (enemies.size() > 1) {
+                moveRandom = true;
+                broadCastToTeam("PLANB");
+                isPlanB = true;
+            }
+        }
+
         RobotPosition enemyPoint = RobotPosition.getPoint(event, this);
+        enemyPoint.setMelee(melee);
         broadCastToTeam(enemyPoint);
-        if (event.getEnergy() < 2 || (moveRandom && event.getEnergy() < this.getEnergy())) {
+
+        if (event.getEnergy() < 2) {
             goToDestination(new Point2D((float) enemyPoint.getX(), (float) enemyPoint.getY()));
         }
-        captainFire(event);
-        // linearTarget(event);
+//        captainFire(event);
+         if (numberMember == 1) {
+             linearTarget(event);
+         }
     }
 
     private void broadCastToTeam(Serializable message) {
@@ -81,6 +93,10 @@ public class CaptainMO3 extends TTeamLeaderRobot {
         updatePoints();
         while (true) {
             if (moveRandom) {
+                if (target != null) {
+                    goToDestination(new Point2D((float) target.getX(), (float) target.getY()));
+                    continue;
+                }
                 randomMove();
                 continue;
             }
@@ -110,8 +126,7 @@ public class CaptainMO3 extends TTeamLeaderRobot {
 
     private void randomMove() {
         int x, y;
-        double borderRange = getBattleFieldWidth() / 2;
-        if (point[0].y < borderRange) {
+        if (point[0].y < 512) {
             x = getRandom(10, 500);
             y = getRandom(10, 1000);
         } else {
@@ -119,8 +134,21 @@ public class CaptainMO3 extends TTeamLeaderRobot {
             y = getRandom(10, 1000);
 
         }
-        goToDestination(new Point2D((float) x, (float) y));
+        goTo(x, y);
         execute();
+    }
+
+    private void goTo(double x, double y) {
+
+        double dx = x - this.getX();
+        double dy = y - this.getY();
+
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        double degree = normalRelativeAngleDegrees(theta - getHeading());
+        turnRight(degree);
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        setAhead(Math.min(distance, 300));
     }
 
     public int getRandom(int min, int max) {
@@ -132,6 +160,9 @@ public class CaptainMO3 extends TTeamLeaderRobot {
         // Calculate enemy's position
         double enemyX = getX() + event.getDistance() * Math.sin(Math.toRadians(enemyBearing));
         double enemyY = getY() + event.getDistance() * Math.cos(Math.toRadians(enemyBearing));
+        if (numberMember == 1) {
+            target = new RobotPosition(enemyX, enemyY);
+        }
 
         double dx = enemyX - this.getX();
         double dy = enemyY - this.getY();
@@ -172,7 +203,9 @@ public class CaptainMO3 extends TTeamLeaderRobot {
             }
         }
         double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
-        // enemy = new RobotPosition(predictedX, predictedY);
+        if (numberMember == 1) {
+            target = new RobotPosition(predictedX, predictedY);
+        }
         // if (numberEnemy <= 2) {
         // enemy.setMelee(true);
         // } else {
@@ -227,6 +260,29 @@ public class CaptainMO3 extends TTeamLeaderRobot {
         if (front && !right || !front && right) {
             setTurnRight(bearing + 60);
             setAhead(150);
+        }
+    }
+
+    @Override
+    public void onTeammateDeath(RobotDeathEvent event) {
+        numberMember--;
+        if (numberMember == 1) {
+            setAdjustGunForRobotTurn(true);
+            setAdjustRadarForGunTurn(true);
+            setAdjustRadarForRobotTurn(true);
+        }
+    }
+
+    @Override
+    public void onEnemyDeath(RobotDeathEvent event) {
+        enemies.remove(event.getName());
+        int size = enemies.size();
+        if (size <= 2) {
+            melee = true;
+        }
+        if (numberMember > size) {
+            broadCastToTeam(RobotColors.getRobotColorDroidMelee());
+            RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorSoloTeam());
         }
     }
 }
