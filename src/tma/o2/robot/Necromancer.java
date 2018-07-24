@@ -63,7 +63,7 @@ public class Necromancer extends TTeamLeaderRobot {
 		init();
 		while (true) {
 			if (getOthers() < 3 && getEnergy() > 100) {
-				if (strategy != Strategy.WALL) {
+				if (strategy != Strategy.MELEE) {
 					strategy = Strategy.MELEE;
 				}
 			}
@@ -77,7 +77,7 @@ public class Necromancer extends TTeamLeaderRobot {
 					}
 				}
 			}
-			if (getEnergy() < lowEnergy) {
+			if (getEnergy() < criticalEnergy) {
 				strategy = Strategy.RANDOM;
 			}
 			switch (strategy) {
@@ -222,6 +222,7 @@ public class Necromancer extends TTeamLeaderRobot {
 	// -----------------
 
 	private void moveRandom() {
+		setMaxVelocity(8);
 		setTurnRadarRight(360);
 		int x = getRandom(10, 1000);
 		int y = getRandom(10, 1000);
@@ -230,15 +231,18 @@ public class Necromancer extends TTeamLeaderRobot {
 	}
 
 	private void moveNear() {
+		setMaxVelocity(8);
 		setTurnRadarRight(360);
 		execute();
 	}
 
 	private void moveWall() {
+		setTurnRadarRight(360);
 		double startX = startOnTop ? 900 : 100;
 		double startY = startOnTop ? 900 : 100;
 		double endX = startOnTop ? 900 : 100;
 		double endY = startOnTop ? 100 : 900;
+		setMaxVelocity(4.5);
 		if (wallTarget.equals("BOTTOM")) {
 			if (getY() < 150) {
 				wallTarget = "TOP";
@@ -260,7 +264,7 @@ public class Necromancer extends TTeamLeaderRobot {
 
 	private void init() {
 		maxEnergy = getEnergy();
-		mediumEnergy = maxEnergy * 65 / 100;
+		mediumEnergy = maxEnergy * 60 / 100;
 		lowEnergy = maxEnergy * 25 / 100;
 		criticalEnergy = maxEnergy * 10 / 100;
 		if (getX() < 500) {
