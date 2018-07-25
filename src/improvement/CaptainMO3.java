@@ -40,11 +40,6 @@ public class CaptainMO3 extends TTeamLeaderRobot {
     @Override
     public void onScannedRobot(ScannedRobotEvent event) {
         if (isTeammate(event.getName())) {
-            // if (event.getEnergy() < 1) {
-            // teamMates.remove(event.getName());
-            // return;
-            // }
-            // teamMates.add(event.getName());
             return;
         }
         enemies.add(event.getName());
@@ -57,16 +52,54 @@ public class CaptainMO3 extends TTeamLeaderRobot {
         }
 
         RobotPosition enemyPoint = RobotPosition.getPoint(event, this);
+        double x = enemyPoint.getX();
+        double y = enemyPoint.getY();
+        if (x > 1000 || x < 50 || y < 50 || y > 1000) {
+            enemyPoint = lineNearForTeam(enemyPoint);
+        }
+
         enemyPoint.setMelee(melee);
         broadCastToTeam(enemyPoint);
 
         if (event.getEnergy() < 2) {
-            goToDestination(new Point2D((float) enemyPoint.getX(), (float) enemyPoint.getY()));
+            goToDestination(new Point2D((float) x, (float) y));
         }
-//        captainFire(event);
-         if (numberMember == 1) {
-             linearTarget(event);
-         }
+        // captainFire(event);
+        if (numberMember == 1) {
+            linearTarget(event);
+        }
+    }
+
+    private RobotPosition lineNearForTeam(RobotPosition enemyPoint) {
+        RobotPosition predictEnemyPoint = new RobotPosition(enemyPoint);
+        double bulletPower = Math.min(3.0D, getEnergy());
+        double myX = getX();
+        double myY = getY();
+        double absoluteBearing = getHeadingRadians() + predictEnemyPoint.getBearingRadians();
+        double enemyX = getX() + predictEnemyPoint.getDistance() * Math.sin(absoluteBearing);
+        double enemyY = getY() + predictEnemyPoint.getDistance() * Math.cos(absoluteBearing);
+        double enemyHeading = predictEnemyPoint.getHeadingRadians();
+        double enemyVelocity = predictEnemyPoint.getVelocity();
+        double deltaTime = 0;
+        double battleFieldHeight = getBattleFieldHeight(), battleFieldWidth = getBattleFieldWidth();
+        double predictedX = enemyX, predictedY = enemyY;
+        while ((++deltaTime) * (20.0 - 3.0 * bulletPower) < java.awt.geom.Point2D.Double.distance(myX, myY, predictedX,
+                predictedY)) {
+            predictedX += Math.sin(enemyHeading) * enemyVelocity;
+            predictedY += Math.cos(enemyHeading) * enemyVelocity;
+            if (predictedX < 18.0 || predictedY < 18.0 || predictedX > battleFieldWidth - 18.0
+                    || predictedY > battleFieldHeight - 18.0) {
+                predictedX = Math.min(Math.max(18.0, predictedX), battleFieldWidth - 18.0);
+                predictedY = Math.min(Math.max(18.0, predictedY), battleFieldHeight - 18.0);
+                break;
+            }
+        }
+        if (numberMember == 1) {
+            target = new RobotPosition(predictedX, predictedY);
+        }
+        predictEnemyPoint.x = predictedX;
+        predictEnemyPoint.y = predictedY;
+        return predictEnemyPoint;
     }
 
     private void broadCastToTeam(Serializable message) {
@@ -266,7 +299,7 @@ public class CaptainMO3 extends TTeamLeaderRobot {
     @Override
     public void onTeammateDeath(RobotDeathEvent event) {
         numberMember--;
-        changeSkin(enemies.size()); 
+        changeSkin(enemies.size());
     }
 
     @Override
@@ -276,7 +309,7 @@ public class CaptainMO3 extends TTeamLeaderRobot {
         if (size <= 2) {
             melee = true;
         }
-        changeSkin(size); 
+        changeSkin(size);
     }
 
     private void changeSkin(int size) {
