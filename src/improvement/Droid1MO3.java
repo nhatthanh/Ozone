@@ -14,7 +14,7 @@ import robocode.util.Utils;
 
 public class Droid1MO3 extends TTeamMemberRobot {
     Point2D[] point = new Point2D[4];
-    private int move = 100;
+    private int move = 150;
     private int countPoint = 4;
     private boolean isPlanB = false;
     private RobotPosition target = null;

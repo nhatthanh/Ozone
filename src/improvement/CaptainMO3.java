@@ -92,7 +92,7 @@ public class CaptainMO3 extends TTeamLeaderRobot {
         }
         updatePoints();
         while (true) {
-            if (moveRandom) {
+            if (moveRandom || numberMember == 1) {
                 if (target != null) {
                     goToDestination(new Point2D((float) target.getX(), (float) target.getY()));
                     continue;
