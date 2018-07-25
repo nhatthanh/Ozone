@@ -127,7 +127,7 @@ public class CaptainMO3 extends TTeamLeaderRobot {
     private void randomMove() {
         int x, y;
         if (point[0].y < 512) {
-            x = getRandom(34, 500);
+            x = getRandom(34, 524);
             y = getRandom(10, 1000);
         } else {
             x = getRandom(500, 990);
