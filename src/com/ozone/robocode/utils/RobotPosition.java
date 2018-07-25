@@ -10,13 +10,14 @@ import robocode.ScannedRobotEvent;
 
 public class RobotPosition implements Serializable {
     private static final long serialVersionUID = 1L;
-    private double x = 0.0D;
-    private double y = 0.0D;
+    public double x = 0.0D;
+    public double y = 0.0D;
     private double energy;
     private double velocity;
     private String name;
     private double power = 0.0D;
-    private int numberEnemy = 5;
+    private boolean melee = false;
+    private boolean soloTeam = false;
     private double bearingRadians;
     private double headingRadians;
     private double distance;
@@ -24,6 +25,20 @@ public class RobotPosition implements Serializable {
     public RobotPosition(double var1, double var3) {
         this.x = var1;
         this.y = var3;
+    }
+
+    public RobotPosition(RobotPosition enemyPoint) {
+        x = enemyPoint.x;
+        y = enemyPoint.y;
+        energy = enemyPoint.energy;
+        velocity = enemyPoint.velocity;
+        name = enemyPoint.name;
+        power = enemyPoint.power;
+        melee = enemyPoint.melee;
+        soloTeam = enemyPoint.soloTeam;
+        bearingRadians = enemyPoint.bearingRadians;
+        headingRadians = enemyPoint.headingRadians;
+        distance = enemyPoint.distance;
     }
 
     public double getX() {
@@ -66,14 +81,6 @@ public class RobotPosition implements Serializable {
         this.power = power;
     }
 
-    public int getNumberEnemy() {
-        return numberEnemy;
-    }
-
-    public void setNumberEnemy(int numberEnemy) {
-        this.numberEnemy = numberEnemy;
-    }
-
     public double getBearingRadians() {
         return bearingRadians;
     }
@@ -88,6 +95,10 @@ public class RobotPosition implements Serializable {
 
     public void setHeadingRadians(double headingRadians) {
         this.headingRadians = headingRadians;
+    }
+    
+    public double getHeading() {
+        return this.headingRadians * 180.0D / 3.141592653589793D;
     }
 
     public double getDistance() {
@@ -104,6 +115,22 @@ public class RobotPosition implements Serializable {
 
     public double getDistance(RobotPosition point1, RobotPosition point2) {
         return Math.sqrt(Math.pow((point1.x - point2.x), 2) + Math.pow((point1.y - point2.y), 2));
+    }
+
+    public boolean isMelee() {
+        return melee;
+    }
+
+    public void setMelee(boolean melee) {
+        this.melee = melee;
+    }
+
+    public boolean isSoloTeam() {
+        return soloTeam;
+    }
+
+    public void setSoloTeam(boolean soloTeam) {
+        this.soloTeam = soloTeam;
     }
 
     /**
@@ -165,5 +192,13 @@ public class RobotPosition implements Serializable {
             return Math.min(1.5d, energy);
         }
         return Math.min(0.5d, energy);
+    }
+    
+    public double getBearing(Robot robot) {
+        RobotPosition tmpPoint = new RobotPosition(x, y);
+        double doi = getDistance(tmpPoint, this);
+        double huyen = getDistanceToEnemey(robot);
+        return Math.toDegrees(Math.asin(doi/huyen));
+        
     }
 }

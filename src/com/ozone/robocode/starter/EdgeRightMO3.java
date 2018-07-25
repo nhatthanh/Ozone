@@ -14,6 +14,7 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
     boolean melee = false;
     RobotPosition target;
     RobotPosition myPos;
+    boolean soloTeam = false;
 
     @Override
     public void onMessageReceived(MessageEvent event) {
@@ -23,12 +24,20 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
         if (event.getMessage() instanceof RobotPosition) {
             RobotPosition p = (RobotPosition) event.getMessage();
             myPos = new RobotPosition(this.getX(), this.getY());
-            if(p.getNumberEnemy() <= 2) {
-                melee = true;
+            if(p.isMelee()){
+                melee = p.isMelee();
                 target = p;
                 findEnemyPoint(p);
             }else {
-                melee = false;
+                melee = p.isMelee();
+                findEnemyPoint(p);
+            }
+            if(p.isSoloTeam()){
+                soloTeam = p.isSoloTeam();
+                target = p;
+                findEnemyPoint(p);
+            }else {
+                soloTeam = p.isSoloTeam();
                 findEnemyPoint(p);
             }
         }else if(event.getMessage().equals("dead")){
@@ -44,16 +53,24 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
         setAdjustRadarForRobotTurn(true);
         double borderRange = (float) getBattleFieldWidth() / 2;
         if (getY() < borderRange) {
+            goTo(300,200);
             point[0] = new RobotPosition(100, 60);
             point[1] = new RobotPosition(970, 60);
             point[2] = new RobotPosition(970, 600);
 
         } else {
+            goTo(700,800);
             point[0] = new RobotPosition(getBattleFieldWidth() - 100, getBattleFieldHeight() - 60);
             point[1] = new RobotPosition(60, getBattleFieldHeight() - 60);
             point[2] = new RobotPosition(60, 400);
         }
         while (true) {
+            if(soloTeam){
+                this.setMaxVelocity(8);
+                goToDestination(250,400);
+                goToDestination(250,600);
+                continue;
+            }
             if(!melee){
                 go();
             }else if(target != null) {
@@ -136,10 +153,26 @@ public class EdgeRightMO3 extends TTeamMemberRobot {
         double dy = p.getY() - this.getY();
         double theta = Math.toDegrees(Math.atan2(dx, dy));
         this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
-        if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+        if(soloTeam){
             setFire(3);
-        } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-            setFire(1.5D);
+        }else {
+            if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+                setFire(3);
+            } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                setFire(1.5D);
+            }
         }
+    }
+
+    private void goToDestination(double x, double y){
+        double dx = x - this.getX();
+        double dy = y - this.getY();
+
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        double degree = normalRelativeAngleDegrees(theta - getHeading());
+        turnRight(degree);
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        ahead(distance);
     }
 }

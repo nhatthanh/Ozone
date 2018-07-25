@@ -17,6 +17,7 @@ public class WallyMO3 extends TTeamMemberRobot {
     RobotPosition myPos;
     boolean melee = false;
     RobotPosition target;
+    boolean soloTeam = false;
     public WallyMO3() {
     }
 
@@ -29,6 +30,12 @@ public class WallyMO3 extends TTeamMemberRobot {
         turnRight(90.0D);
 
         while(true) {
+            if(soloTeam){
+                this.setMaxVelocity(8);
+                goToDestination(200,200);
+                goToDestination(400,200);
+                continue;
+            }
             if(!melee){
                 ahead(this.moveAmount);
                 turnLeft(90.0D);
@@ -36,6 +43,7 @@ public class WallyMO3 extends TTeamMemberRobot {
                 setMaxVelocity(8);
                 goTo(target.getX(),target.getY());
             }
+
         }
     }
 
@@ -44,12 +52,20 @@ public class WallyMO3 extends TTeamMemberRobot {
         if (e.getMessage() instanceof RobotPosition) {
             myPos = new RobotPosition(this.getX(), this.getY());
             RobotPosition p = (RobotPosition)e.getMessage();
-            if(p.getNumberEnemy() <= 2){
-                melee = true;
+            if(p.isMelee()){
+                melee = p.isMelee();
                 target = p;
                 findEnemyPoint(p);
             }else {
-                melee = false;
+                melee = p.isMelee();
+                findEnemyPoint(p);
+            }
+            if(p.isSoloTeam()){
+                soloTeam = p.isSoloTeam();
+                target = p;
+                findEnemyPoint(p);
+            }else {
+                soloTeam = p.isSoloTeam();
                 findEnemyPoint(p);
             }
         } else if (e.getMessage() instanceof RobotColors) {
@@ -101,25 +117,25 @@ public class WallyMO3 extends TTeamMemberRobot {
         }
     }
 
-    public void onHitByBullet(HitByBulletEvent event) {
-        double bearing = event.getBearing();
-        if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
-            return;
-        }
-        boolean front = Math.abs(bearing) < 45 ? true : false;
-        boolean right = bearing > 0 ? true : false;
-        if (bearing > 135) {
-            bearing = 180 - bearing;
-        }
-        if (front && right || !front && !right) {
-            turnLeft(60 - bearing);
-            ahead(150);
-        }
-        if (front && !right || !front && right) {
-            turnRight(bearing + 60);
-            ahead(150);
-        }
-    }
+//    public void onHitByBullet(HitByBulletEvent event) {
+//        double bearing = event.getBearing();
+//        if (Math.abs(bearing) > 45 && Math.abs(bearing) < 135) {
+//            return;
+//        }
+//        boolean front = Math.abs(bearing) < 45 ? true : false;
+//        boolean right = bearing > 0 ? true : false;
+//        if (bearing > 135) {
+//            bearing = 180 - bearing;
+//        }
+//        if (front && right || !front && !right) {
+//            turnLeft(60 - bearing);
+//            ahead(150);
+//        }
+//        if (front && !right || !front && right) {
+//            turnRight(bearing + 60);
+//            ahead(150);
+//        }
+//    }
 
     private void goTo(double x, double y) {
 
@@ -134,15 +150,32 @@ public class WallyMO3 extends TTeamMemberRobot {
         ahead(Math.min(distance, 300));
     }
 
+    private void goToDestination(double x, double y){
+        double dx = x - this.getX();
+        double dy = y - this.getY();
+
+        double theta = Math.toDegrees(Math.atan2(dx, dy));
+        double degree = normalRelativeAngleDegrees(theta - getHeading());
+        turnRight(degree);
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        ahead(distance);
+    }
+
     private void findEnemyPoint(RobotPosition p){
         double dx = p.getX() - this.getX();
         double dy = p.getY() - this.getY();
         double theta = Math.toDegrees(Math.atan2(dx, dy));
         this.turnGunRight(Utils.normalRelativeAngleDegrees(theta - this.getGunHeading()));
-        if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
-            fire(3);
-        } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
-            fire(2);
+        if(soloTeam){
+            setFire(3);
+        }else {
+            if (this.getEnergy() > 50 && p.getDistance(myPos, p) <= 400) {
+                setFire(3);
+            } else if (this.getEnergy() <= 50 || p.getDistance(myPos, p) > 400) {
+                setFire(1.5D);
+            }
         }
     }
+
 }
