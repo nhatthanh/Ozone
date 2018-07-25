@@ -266,10 +266,7 @@ public class CaptainMO3 extends TTeamLeaderRobot {
     @Override
     public void onTeammateDeath(RobotDeathEvent event) {
         numberMember--;
-        if (numberMember < enemies.size()) {
-            broadCastToTeam(RobotColors.getRobotColorDroidLow());
-            RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorSoloTeam());
-        }
+        changeSkin(enemies.size()); 
     }
 
     @Override
@@ -279,9 +276,19 @@ public class CaptainMO3 extends TTeamLeaderRobot {
         if (size <= 2) {
             melee = true;
         }
+        changeSkin(size); 
+    }
+
+    private void changeSkin(int size) {
         if (numberMember > size) {
             broadCastToTeam(RobotColors.getRobotColorDroidMelee());
             RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorSoloTeam());
+            return;
+        }
+        if (numberMember < size) {
+            broadCastToTeam(RobotColors.getRobotColorDroidLow());
+            RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorSoloTeam());
+            return;
         }
     }
 }
