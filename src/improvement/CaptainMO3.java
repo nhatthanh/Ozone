@@ -266,10 +266,9 @@ public class CaptainMO3 extends TTeamLeaderRobot {
     @Override
     public void onTeammateDeath(RobotDeathEvent event) {
         numberMember--;
-        if (numberMember == 1) {
-            setAdjustGunForRobotTurn(true);
-            setAdjustRadarForGunTurn(true);
-            setAdjustRadarForRobotTurn(true);
+        if (numberMember < enemies.size()) {
+            broadCastToTeam(RobotColors.getRobotColorDroidLow());
+            RobotColors.setColorTeamRobot(this, RobotColors.getRobotColorSoloTeam());
         }
     }
 
